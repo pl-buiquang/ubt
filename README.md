@@ -4,6 +4,7 @@
 
 [![CI](https://github.com/pl-buiquang/ubt/actions/workflows/ci.yml/badge.svg)](https://github.com/pl-buiquang/ubt/actions/workflows/ci.yml)
 [![Latest Release](https://img.shields.io/github/v/release/pl-buiquang/ubt)](https://github.com/pl-buiquang/ubt/releases/latest)
+[![Crates.io](https://img.shields.io/crates/v/ubt-cli)](https://crates.io/crates/ubt-cli)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 ---
@@ -29,7 +30,7 @@ This installs the latest release binary to `~/.local/bin`.
 **Via Cargo:**
 
 ```sh
-cargo install ubt
+cargo install ubt-cli
 ```
 
 ---

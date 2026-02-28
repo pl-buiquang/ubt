@@ -1,5 +1,5 @@
 [package]
-name = "ubt"
+name = "ubt-cli"
 version = "0.1.0"
 edition = "2021"
 description = "Universal build tool — one CLI for every ecosystem"

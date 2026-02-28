@@ -21,4 +21,4 @@ See [PLAN.md](specs/PLAN.md) for full task details and dependency graph.
 - [x] **Task 15:** Shell Completions — Generate completions for bash, zsh, fish, PowerShell via `clap_complete`
 - [x] **Task 16:** Polish & Edge Cases — Colored errors, `--verbose` trace, `--quiet`, `--version`, config validation
 - [x] **Task 17:** E2E Docker Tests — Real builds in Docker containers (node, go, rust, python, ruby) against tiny hello-world projects
-- [ ] **Task 18:** crates.io Publishing — rename package to `ubt-cli`, add `cargo publish` step to release workflow, document one-time setup
+- [x] **Task 18:** crates.io Publishing — rename package to `ubt-cli`, add `cargo publish` step to release workflow, document one-time setup

@@ -1,16 +1,16 @@
 use std::process;
 
 use clap::Parser;
-use ubt::cli::{
+use ubt_cli::cli::{
     collect_remaining_args, collect_universal_flags, parse_command_name, Cli, Command,
     ConfigCommand, RunArgs, RunFileArgs, ToolCommand,
 };
-use ubt::completions::generate_completions;
-use ubt::config::load_config;
-use ubt::detect::detect_tool;
-use ubt::error::UbtError;
-use ubt::executor::{resolve_command, spawn_command, ResolveContext};
-use ubt::plugin::PluginRegistry;
+use ubt_cli::completions::generate_completions;
+use ubt_cli::config::load_config;
+use ubt_cli::detect::detect_tool;
+use ubt_cli::error::UbtError;
+use ubt_cli::executor::{resolve_command, spawn_command, ResolveContext};
+use ubt_cli::plugin::PluginRegistry;
 
 fn main() {
     let cli = Cli::parse();
@@ -143,7 +143,7 @@ fn run(cli: Cli) -> Result<(), UbtError> {
 
 fn cmd_info(
     cli: &Cli,
-    config: Option<&ubt::config::UbtConfig>,
+    config: Option<&ubt_cli::config::UbtConfig>,
     project_root: &std::path::Path,
     registry: &PluginRegistry,
 ) -> Result<(), UbtError> {
@@ -184,7 +184,7 @@ fn cmd_info(
 fn cmd_tool(
     sub: &ToolCommand,
     cli: &Cli,
-    config: Option<&ubt::config::UbtConfig>,
+    config: Option<&ubt_cli::config::UbtConfig>,
     project_root: &std::path::Path,
     registry: &PluginRegistry,
 ) -> Result<(), UbtError> {
