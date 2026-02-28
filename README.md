@@ -201,6 +201,14 @@ cargo test
 
 Please follow [Conventional Commits](https://www.conventionalcommits.org/) for all commit messages.
 
+### Releasing
+
+1. Bump the version in `Cargo.toml` and `Cargo.lock` (`cargo check`)
+2. Commit: `chore: bump version to X.Y.Z`
+3. Tag and push: `git tag X.Y.Z && git push origin main X.Y.Z`
+
+The release workflow automatically builds binaries for 5 platforms, generates a changelog, publishes a GitHub release, and publishes to crates.io. A validation step ensures the tag matches `Cargo.toml` before any builds start.
+
 ---
 
 ## License
