@@ -6,7 +6,7 @@ See [PLAN.md](specs/PLAN.md) for full task details and dependency graph.
 
 - [ ] **Task 1:** Project Boilerplate — Cargo project, directory structure, dependencies, `.gitignore`, empty module stubs
 - [x] **Task 2:** Error Types — `UbtError` enum with `thiserror`, all variants from SPEC §10
-- [ ] **Task 3:** Plugin Data Model — `Plugin`, `DetectConfig`, `Variant`, `FlagTranslation`, `ResolvedPlugin` structs
+- [x] **Task 3:** Plugin Data Model — `Plugin`, `DetectConfig`, `Variant`, `FlagTranslation`, `ResolvedPlugin` structs
 - [ ] **Task 4:** Plugin TOML Parsing — Serde deserialization of `.toml` plugin files, validation
 - [ ] **Task 5:** Plugin Loading & Registry — `PluginRegistry`, built-in plugins via `include_str!`, user/project plugin dirs
 - [ ] **Task 6:** Config Parsing — `ubt.toml` parsing (`[project]`, `[commands]`, `[aliases]`), `find_config()`, alias validation
