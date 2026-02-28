@@ -446,7 +446,9 @@ pub fn collect_universal_flags(cmd: &Command) -> UniversalFlags {
             dry_run: args.dry_run,
             ..Default::default()
         },
-        Command::External(..) => unreachable!("External is dispatched before collect_universal_flags"),
+        Command::External(..) => {
+            unreachable!("External is dispatched before collect_universal_flags")
+        }
         _ => UniversalFlags::default(),
     }
 }
@@ -490,7 +492,9 @@ pub fn collect_remaining_args(cmd: &Command) -> Vec<String> {
         | Command::Tool(_)
         | Command::Config(_)
         | Command::Completions(_) => vec![],
-        Command::External(..) => unreachable!("External is dispatched before collect_remaining_args"),
+        Command::External(..) => {
+            unreachable!("External is dispatched before collect_remaining_args")
+        }
     }
 }
 

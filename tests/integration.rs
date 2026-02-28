@@ -125,7 +125,11 @@ fn config_show_without_config() {
 #[test]
 fn config_commands_override_is_used() {
     let dir = TempDir::new().unwrap();
-    std::fs::write(dir.path().join("Cargo.toml"), "[package]\nname=\"x\"\nversion=\"0.1.0\"\nedition=\"2021\"\n").unwrap();
+    std::fs::write(
+        dir.path().join("Cargo.toml"),
+        "[package]\nname=\"x\"\nversion=\"0.1.0\"\nedition=\"2021\"\n",
+    )
+    .unwrap();
     std::fs::write(
         dir.path().join("ubt.toml"),
         "[project]\ntool = \"cargo\"\n[commands]\nbuild = \"echo custom-build-ran\"\n",

@@ -319,10 +319,7 @@ fn cmd_init() -> Result<(), UbtError> {
                 .unwrap_or_else(|| r#"start = "your-command-here""#.to_string());
             (detection.variant_name, example)
         }
-        Err(_) => (
-            "npm".to_string(),
-            r#"start = "npm run dev""#.to_string(),
-        ),
+        Err(_) => ("npm".to_string(), r#"start = "npm run dev""#.to_string()),
     };
 
     let content = format!(
