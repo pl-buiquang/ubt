@@ -1,0 +1,49 @@
+[plugin]
+name = "ruby"
+description = "Ruby projects"
+homepage = "https://www.ruby-lang.org/"
+install_help = "https://www.ruby-lang.org/en/downloads/"
+default_variant = "bundler"
+
+[detect]
+files = ["Gemfile"]
+
+[variants.bundler]
+detect_files = ["Gemfile.lock"]
+binary = "bundle"
+
+[variants.gem]
+detect_files = []
+binary = "gem"
+
+[commands]
+"dep.install" = "{{tool}} install"
+"dep.install_pkg" = "{{tool}} add {{args}}"
+"dep.remove" = "{{tool}} remove {{args}}"
+"dep.update" = "{{tool}} update {{args}}"
+"dep.list" = "{{tool}} list"
+"dep.outdated" = "{{tool}} outdated"
+"dep.lock" = "{{tool}} lock"
+build = "{{tool}} exec rake build"
+test = "{{tool}} exec rake test"
+lint = "{{tool}} exec rubocop"
+"lint.fix" = "{{tool}} exec rubocop -a"
+fmt = "{{tool}} exec rubocop -a"
+"fmt.check" = "{{tool}} exec rubocop --format simple"
+run = "{{tool}} exec {{args}}"
+"run-file" = "ruby {{file}}"
+exec = "{{tool}} exec {{args}}"
+clean = "{{tool}} clean"
+publish = "gem push pkg/*.gem"
+
+[commands.variants.gem]
+"dep.install" = "gem install"
+"dep.install_pkg" = "gem install {{args}}"
+"dep.remove" = "gem uninstall {{args}}"
+"dep.update" = "gem update {{args}}"
+"dep.list" = "gem list"
+"dep.outdated" = "gem outdated"
+
+[unsupported]
+"dep.audit" = "Use 'bundle-audit': gem install bundler-audit && bundle-audit check"
+"dep.why" = "Use 'bundle viz' or 'bundle info <gem>' to trace dependencies"

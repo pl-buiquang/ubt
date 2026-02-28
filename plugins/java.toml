@@ -1,0 +1,52 @@
+[plugin]
+name = "java"
+description = "Java projects"
+homepage = "https://docs.oracle.com/en/java/"
+install_help = "https://adoptium.net/"
+default_variant = "mvn"
+
+[detect]
+files = ["pom.xml", "build.gradle", "build.gradle.kts"]
+
+[variants.mvn]
+detect_files = ["pom.xml"]
+binary = "mvn"
+
+[variants.gradle]
+detect_files = ["build.gradle", "build.gradle.kts"]
+binary = "gradle"
+
+[commands]
+"dep.install" = "{{tool}} dependency:resolve"
+"dep.install_pkg" = "{{tool}} dependency:resolve"
+"dep.update" = "{{tool}} versions:use-latest-versions"
+"dep.list" = "{{tool}} dependency:tree"
+"dep.outdated" = "{{tool}} versions:display-dependency-updates"
+build = "{{tool}} package"
+test = "{{tool}} test"
+lint = "{{tool}} checkstyle:check"
+fmt = "{{tool}} spotless:apply"
+"fmt.check" = "{{tool}} spotless:check"
+clean = "{{tool}} clean"
+publish = "{{tool}} deploy"
+release = "{{tool}} release:prepare release:perform"
+
+[commands.variants.gradle]
+"dep.install" = "{{tool}} dependencies"
+"dep.install_pkg" = "{{tool}} dependencies"
+"dep.update" = "{{tool}} dependencyUpdates"
+"dep.list" = "{{tool}} dependencies"
+"dep.outdated" = "{{tool}} dependencyUpdates"
+build = "{{tool}} build"
+test = "{{tool}} test"
+lint = "{{tool}} check"
+fmt = "{{tool}} spotlessApply"
+"fmt.check" = "{{tool}} spotlessCheck"
+clean = "{{tool}} clean"
+publish = "{{tool}} publish"
+run = "{{tool}} run"
+
+[unsupported]
+"dep.audit" = "Use 'dependency-check' plugin: mvn dependency-check:check"
+"dep.lock" = "Maven/Gradle do not use lockfiles by default."
+"dep.why" = "Use 'mvn dependency:tree -Dincludes=<pkg>' to trace dependencies"

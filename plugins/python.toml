@@ -1,0 +1,72 @@
+[plugin]
+name = "python"
+description = "Python projects"
+homepage = "https://docs.python.org/"
+install_help = "https://www.python.org/downloads/"
+default_variant = "pip"
+
+[detect]
+files = ["pyproject.toml", "requirements.txt", "setup.py", "setup.cfg"]
+
+[variants.pip]
+detect_files = ["requirements.txt", "setup.py", "setup.cfg"]
+binary = "pip"
+
+[variants.uv]
+detect_files = ["uv.lock"]
+binary = "uv"
+
+[variants.poetry]
+detect_files = ["poetry.lock"]
+binary = "poetry"
+
+[commands]
+"dep.install" = "{{tool}} install -r requirements.txt"
+"dep.install_pkg" = "{{tool}} install {{args}}"
+"dep.remove" = "{{tool}} uninstall {{args}}"
+"dep.list" = "{{tool}} list"
+"dep.audit" = "{{tool}} audit"
+test = "python -m pytest"
+lint = "python -m flake8"
+fmt = "python -m black ."
+"fmt.check" = "python -m black --check ."
+run = "python -m {{args}}"
+"run-file" = "python {{file}}"
+clean = "find . -type d -name __pycache__ -exec rm -rf {} + && rm -rf .pytest_cache dist build *.egg-info"
+publish = "python -m twine upload dist/*"
+
+[commands.variants.uv]
+"dep.install" = "uv sync"
+"dep.install_pkg" = "uv add {{args}}"
+"dep.remove" = "uv remove {{args}}"
+"dep.update" = "uv lock --upgrade"
+"dep.list" = "uv pip list"
+test = "uv run pytest"
+lint = "uv run flake8"
+fmt = "uv run black ."
+"fmt.check" = "uv run black --check ."
+run = "uv run {{args}}"
+"run-file" = "uv run python {{file}}"
+publish = "uv publish"
+
+[commands.variants.poetry]
+"dep.install" = "poetry install"
+"dep.install_pkg" = "poetry add {{args}}"
+"dep.remove" = "poetry remove {{args}}"
+"dep.update" = "poetry update {{args}}"
+"dep.list" = "poetry show"
+test = "poetry run pytest"
+lint = "poetry run flake8"
+fmt = "poetry run black ."
+"fmt.check" = "poetry run black --check ."
+run = "poetry run {{args}}"
+"run-file" = "poetry run python {{file}}"
+exec = "poetry run {{args}}"
+publish = "poetry publish --build"
+
+[flags.test]
+coverage = "--cov"
+
+[unsupported]
+"dep.lock" = "Use 'pip freeze > requirements.txt' or 'poetry lock' directly."
+"dep.why" = "Use 'pipdeptree' directly: pip install pipdeptree && pipdeptree -r -p <pkg>"

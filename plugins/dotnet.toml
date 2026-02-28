@@ -1,0 +1,38 @@
+[plugin]
+name = "dotnet"
+description = ".NET projects"
+homepage = "https://learn.microsoft.com/en-us/dotnet/"
+install_help = "https://dotnet.microsoft.com/download"
+default_variant = "dotnet"
+
+[detect]
+files = ["*.csproj", "*.fsproj", "*.sln"]
+
+[variants.dotnet]
+detect_files = ["*.csproj", "*.fsproj", "*.sln"]
+binary = "dotnet"
+
+[commands]
+"dep.install" = "{{tool}} restore"
+"dep.install_pkg" = "{{tool}} add package {{args}}"
+"dep.remove" = "{{tool}} remove package {{args}}"
+"dep.list" = "{{tool}} list package"
+"dep.outdated" = "{{tool}} list package --outdated"
+"dep.update" = "{{tool}} list package --outdated"
+build = "{{tool}} build"
+test = "{{tool}} test"
+run = "{{tool}} run --project {{args}}"
+start = "{{tool}} run"
+clean = "{{tool}} clean"
+publish = "{{tool}} publish"
+release = "{{tool}} publish -c Release"
+fmt = "{{tool}} format"
+"fmt.check" = "{{tool}} format --verify-no-changes"
+
+[flags.build]
+dev = "--configuration Debug"
+
+[unsupported]
+"dep.audit" = "Use 'dotnet list package --vulnerable' to check for vulnerabilities"
+"dep.lock" = "Use 'dotnet restore --use-lock-file' to generate packages.lock.json"
+"dep.why" = "Use 'dotnet nuget why' (requires NuGet 6.7+) to trace dependencies"
