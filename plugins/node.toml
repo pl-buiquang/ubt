@@ -1,0 +1,77 @@
+[plugin]
+name = "node"
+description = "Node.js projects"
+homepage = "https://docs.npmjs.com/"
+install_help = "https://nodejs.org/en/download/"
+default_variant = "npm"
+
+[detect]
+files = ["package.json"]
+
+[variants.npm]
+detect_files = ["package-lock.json"]
+binary = "npm"
+
+[variants.pnpm]
+detect_files = ["pnpm-lock.yaml"]
+binary = "pnpm"
+
+[variants.yarn]
+detect_files = ["yarn.lock"]
+binary = "yarn"
+
+[variants.bun]
+detect_files = ["bun.lockb", "bun.lock"]
+binary = "bun"
+
+[variants.deno]
+detect_files = ["deno.json", "deno.jsonc"]
+binary = "deno"
+
+[commands]
+"dep.install" = "{{tool}} install"
+"dep.install_pkg" = "{{tool}} add {{args}}"
+"dep.remove" = "{{tool}} remove {{args}}"
+"dep.update" = "{{tool}} update {{args}}"
+"dep.outdated" = "{{tool}} outdated"
+"dep.list" = "{{tool}} list"
+"dep.audit" = "{{tool}} audit"
+build = "{{tool}} run build"
+start = "{{tool}} run dev"
+test = "{{tool}} test"
+run = "{{tool}} run {{args}}"
+exec = "npx {{args}}"
+lint = "{{tool}} run lint"
+fmt = "{{tool}} run format"
+clean = "rm -rf node_modules dist .next .nuxt"
+publish = "{{tool}} publish"
+
+[commands.variants.yarn]
+"dep.install_pkg" = "yarn add {{args}}"
+"dep.remove" = "yarn remove {{args}}"
+exec = "yarn dlx {{args}}"
+
+[commands.variants.pnpm]
+exec = "pnpm dlx {{args}}"
+
+[commands.variants.bun]
+exec = "bunx {{args}}"
+
+[commands.variants.deno]
+"dep.install" = "deno install"
+"dep.install_pkg" = "deno add {{args}}"
+test = "deno test"
+run = "deno task {{args}}"
+exec = "deno run {{args}}"
+
+[flags.test]
+watch = "--watchAll"
+coverage = "--coverage"
+
+[flags.build]
+watch = "--watch"
+dev = "--mode=development"
+
+[unsupported]
+"dep.why" = "Use 'npm explain <pkg>' directly: npm explain <pkg>"
+"dep.lock" = "Delete your lockfile and run 'ubt dep install' to regenerate."
