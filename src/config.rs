@@ -297,11 +297,8 @@ typecheck = "pnpm exec tsc --noEmit"
         let result = find_config(&nested).unwrap().unwrap();
 
         // Restore env
-        match prev {
-            Some(v) => unsafe {
-                std::env::set_var("UBT_CONFIG", v);
-            },
-            None => {}
+        if let Some(v) = prev {
+            unsafe { std::env::set_var("UBT_CONFIG", v); }
         }
 
         assert_eq!(result.0.project.unwrap().tool.unwrap(), "go");
@@ -319,11 +316,8 @@ typecheck = "pnpm exec tsc --noEmit"
         let dir = TempDir::new().unwrap();
         let result = find_config(dir.path()).unwrap();
 
-        match prev {
-            Some(v) => unsafe {
-                std::env::set_var("UBT_CONFIG", v);
-            },
-            None => {}
+        if let Some(v) = prev {
+            unsafe { std::env::set_var("UBT_CONFIG", v); }
         }
 
         assert!(result.is_none());
