@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO="OWNER/ubt"
+REPO="pl-buiquang/ubt"
 BIN_NAME="ubt"
 INSTALL_DIR="${UBT_INSTALL_DIR:-$HOME/.local/bin}"
 FROM_SOURCE=false

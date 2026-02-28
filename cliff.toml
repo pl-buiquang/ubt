@@ -12,7 +12,7 @@ body = """
 {% for group, commits in commits | group_by(attribute="group") %}
     ### {{ group | upper_first }}
     {% for commit in commits %}
-        - {% if commit.breaking %}[**breaking**] {% endif %}{{ commit.message | upper_first }} ([`{{ commit.id | truncate(length=7, end="") }}`]({{ "https://github.com/OWNER/ubt/commit/" }}{{ commit.id }}))\
+        - {% if commit.breaking %}[**breaking**] {% endif %}{{ commit.message | upper_first }} ([`{{ commit.id | truncate(length=7, end="") }}`]({{ "https://github.com/pl-buiquang/ubt/commit/" }}{{ commit.id }}))\
     {% endfor %}
 {% endfor %}\n
 """
@@ -21,10 +21,10 @@ footer = """
     {% if release.version -%}
         {% if release.previous.version -%}
             [{{ release.version | trim_start_matches(pat="v") }}]: \
-                https://github.com/OWNER/ubt/compare/{{ release.previous.version }}...{{ release.version }}
+                https://github.com/pl-buiquang/ubt/compare/{{ release.previous.version }}...{{ release.version }}
         {% endif -%}
     {% else -%}
-        [unreleased]: https://github.com/OWNER/ubt/compare/{{ release.previous.version }}...HEAD
+        [unreleased]: https://github.com/pl-buiquang/ubt/compare/{{ release.previous.version }}...HEAD
     {% endif -%}
 {% endfor %}
 """

@@ -2,8 +2,8 @@
 
 > One CLI to build, test, run, and manage dependencies across every ecosystem.
 
-[![CI](https://github.com/OWNER/ubt/actions/workflows/ci.yml/badge.svg)](https://github.com/OWNER/ubt/actions/workflows/ci.yml)
-[![Latest Release](https://img.shields.io/github/v/release/OWNER/ubt)](https://github.com/OWNER/ubt/releases/latest)
+[![CI](https://github.com/pl-buiquang/ubt/actions/workflows/ci.yml/badge.svg)](https://github.com/pl-buiquang/ubt/actions/workflows/ci.yml)
+[![Latest Release](https://img.shields.io/github/v/release/pl-buiquang/ubt)](https://github.com/pl-buiquang/ubt/releases/latest)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Crates.io](https://img.shields.io/crates/v/ubt)](https://crates.io/crates/ubt)
 
@@ -22,7 +22,7 @@ It auto-detects your project type from lockfiles and manifests, resolves the cor
 **One-liner (Linux & macOS):**
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/OWNER/ubt/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/pl-buiquang/ubt/main/install.sh | bash
 ```
 
 This installs the latest release binary to `~/.local/bin`.
@@ -194,7 +194,7 @@ A plugin file specifies detection rules (lockfile globs, manifest names), comman
 ## Contributing
 
 ```sh
-git clone https://github.com/OWNER/ubt
+git clone https://github.com/pl-buiquang/ubt
 cd ubt
 cargo test
 ```

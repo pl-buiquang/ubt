@@ -2,6 +2,11 @@
 name = "ubt"
 version = "0.1.0"
 edition = "2021"
+description = "Universal build tool — one CLI for every ecosystem"
+license = "MIT"
+repository = "https://github.com/pl-buiquang/ubt"
+keywords = ["build", "cli", "universal", "tooling", "dev"]
+categories = ["command-line-utilities", "development-tools"]
 
 [[bin]]
 name = "ubt"
