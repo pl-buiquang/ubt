@@ -11,7 +11,7 @@ See [PLAN.md](specs/PLAN.md) for full task details and dependency graph.
 - [ ] **Task 5:** Plugin Loading & Registry — `PluginRegistry`, built-in plugins via `include_str!`, user/project plugin dirs
 - [ ] **Task 6:** Config Parsing — `ubt.toml` parsing (`[project]`, `[commands]`, `[aliases]`), `find_config()`, alias validation
 - [ ] **Task 7:** Detection Algorithm — CLI override → env var → config → auto-detect, glob patterns, priority resolution
-- [ ] **Task 8:** CLI Definition — Full clap derive structure, universal flags, `--tool` flag, command name parsing
+- [x] **Task 8:** CLI Definition — Full clap derive structure, universal flags, `--tool` flag, command name parsing
 - [ ] **Task 9:** Command Resolution — Alias → config override → plugin mapping → flag translation → template assembly
 - [ ] **Task 10:** Process Execution — Process spawning, `exec()` on Unix, exit code forwarding, `shell-words` splitting
 - [ ] **Task 11:** Main Pipeline Integration — Wire everything in `main.rs`, handle `info`, `config show`, `tool` subcommands, `init`
