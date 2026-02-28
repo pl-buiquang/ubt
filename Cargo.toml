@@ -1,0 +1,24 @@
+[package]
+name = "ubt"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "ubt"
+path = "src/main.rs"
+
+[dependencies]
+clap = { version = "4", features = ["derive", "env"] }
+clap_complete = "4"
+serde = { version = "1", features = ["derive"] }
+toml = "0.8"
+thiserror = "2"
+globset = ">=0.4, <0.4.16"
+which = "7"
+dirs = "6"
+shell-words = "1"
+
+[dev-dependencies]
+tempfile = "3"
+assert_cmd = "2"
+predicates = "3"
