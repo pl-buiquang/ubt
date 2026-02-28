@@ -52,9 +52,6 @@ ubt fmt
 
 # Run the project
 ubt run
-
-# Open an interactive REPL / shell
-ubt shell
 ```
 
 ---
@@ -81,43 +78,72 @@ ubt shell
 |---------|-------------|
 | `ubt build` | Compile / build the project |
 | `ubt run [args]` | Run the project entry point |
-| `ubt start` | Start the application (production mode) |
-| `ubt watch` | Rebuild/restart on file changes |
+| `ubt start` | Start the application (dev server, etc.) |
+| `ubt run-file <file> [args]` | Run a file directly |
+| `ubt exec <cmd> [args]` | Execute an arbitrary command via the tool |
+| `ubt check [args]` | Type-check / compile-check without producing output |
 
 ### Testing
 
 | Command | Description |
 |---------|-------------|
 | `ubt test [args]` | Run the test suite |
-| `ubt test:watch` | Run tests in watch mode |
-| `ubt test:coverage` | Run tests with coverage report |
+| `ubt test --watch` | Run tests in watch mode |
+| `ubt test --coverage` | Run tests with coverage report |
 
 ### Dependencies
 
 | Command | Description |
 |---------|-------------|
 | `ubt dep install` | Install / sync all dependencies |
-| `ubt dep add <pkg>` | Add a new dependency |
 | `ubt dep remove <pkg>` | Remove a dependency |
 | `ubt dep update` | Update dependencies |
+| `ubt dep outdated` | Show outdated dependencies |
 | `ubt dep list` | List installed dependencies |
+| `ubt dep audit` | Audit dependencies for vulnerabilities |
+| `ubt dep lock` | Generate or update lock file |
+| `ubt dep why <pkg>` | Explain why a dependency is installed |
 
 ### Code Quality
 
 | Command | Description |
 |---------|-------------|
 | `ubt fmt` | Format source code |
-| `ubt fmt:check` | Check formatting without writing |
+| `ubt fmt --check` | Check formatting without modifying files |
 | `ubt lint` | Run the linter |
-| `ubt lint:fix` | Run linter with auto-fix |
+| `ubt lint --fix` | Run linter with auto-fix |
 
-### Utilities
+### Database
 
 | Command | Description |
 |---------|-------------|
+| `ubt db migrate` | Run database migrations |
+| `ubt db rollback` | Rollback database migrations |
+| `ubt db seed` | Seed the database |
+| `ubt db create` | Create the database |
+| `ubt db drop` | Drop the database |
+| `ubt db reset` | Reset the database (drop + create + migrate) |
+| `ubt db status` | Show migration status |
+
+### Project Lifecycle
+
+| Command | Description |
+|---------|-------------|
+| `ubt init` | Initialize a new project configuration |
+| `ubt release [--dry-run]` | Create a release |
+| `ubt publish [--dry-run] [-y]` | Publish a package |
 | `ubt clean` | Remove build artifacts |
-| `ubt shell` | Open an interactive REPL or shell |
-| `ubt info` | Show detected tool and project info |
+
+### Diagnostics & Config
+
+| Command | Description |
+|---------|-------------|
+| `ubt info` | Show detected tool/runtime info |
+| `ubt tool info` | Show detected tool information |
+| `ubt tool doctor` | Run diagnostic checks |
+| `ubt tool list` | List available tools/plugins |
+| `ubt tool docs` | Open tool documentation |
+| `ubt config show` | Show current configuration |
 | `ubt completions <shell>` | Generate shell completion script |
 
 ---
