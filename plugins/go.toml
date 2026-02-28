@@ -1,0 +1,41 @@
+[plugin]
+name = "go"
+description = "Go projects"
+homepage = "https://go.dev/doc/"
+install_help = "https://go.dev/dl/"
+priority = 0
+default_variant = "go"
+
+[detect]
+files = ["go.mod"]
+
+[variants.go]
+detect_files = ["go.mod"]
+binary = "go"
+
+[commands]
+"dep.install" = "{{tool}} mod download"
+"dep.install_pkg" = "{{tool}} get {{args}}"
+"dep.remove" = "{{tool}} mod edit -droprequire {{args}}"
+"dep.update" = "{{tool}} get -u {{args}}"
+"dep.list" = "{{tool}} list -m all"
+"dep.lock" = "{{tool}} mod tidy"
+build = "{{tool}} build ./..."
+start = "{{tool}} run ."
+"run-file" = "{{tool}} run {{file}}"
+test = "{{tool}} test ./..."
+lint = "golangci-lint run"
+fmt = "{{tool}} fmt ./..."
+clean = "{{tool}} clean -cache"
+
+[flags.test]
+watch = "unsupported"
+coverage = "-cover"
+
+[flags.build]
+watch = "unsupported"
+
+[unsupported]
+"dep.audit" = "Use 'govulncheck' directly: go install golang.org/x/vuln/cmd/govulncheck@latest && govulncheck ./..."
+"dep.outdated" = "Use 'go-mod-outdated': go install github.com/psampaz/go-mod-outdated@latest && go list -u -m -json all | go-mod-outdated"
+"dep.why" = "Use 'go mod why <pkg>' directly: go mod why <pkg>"
