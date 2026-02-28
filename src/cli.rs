@@ -86,6 +86,10 @@ pub enum Command {
 
     /// Generate shell completions
     Completions(CompletionsArgs),
+
+    /// Catch-all for alias dispatch from [aliases] in ubt.toml
+    #[command(external_subcommand)]
+    External(Vec<String>),
 }
 
 // ── Shared passthrough args ────────────────────────────────────────────
@@ -399,6 +403,7 @@ pub fn parse_command_name(cmd: &Command) -> &'static str {
         },
         Command::Info => "info",
         Command::Completions(..) => "completions",
+        Command::External(..) => unreachable!("External is dispatched before parse_command_name"),
     }
 }
 
@@ -441,6 +446,7 @@ pub fn collect_universal_flags(cmd: &Command) -> UniversalFlags {
             dry_run: args.dry_run,
             ..Default::default()
         },
+        Command::External(..) => unreachable!("External is dispatched before collect_universal_flags"),
         _ => UniversalFlags::default(),
     }
 }
@@ -484,6 +490,7 @@ pub fn collect_remaining_args(cmd: &Command) -> Vec<String> {
         | Command::Tool(_)
         | Command::Config(_)
         | Command::Completions(_) => vec![],
+        Command::External(..) => unreachable!("External is dispatched before collect_remaining_args"),
     }
 }
 
@@ -911,9 +918,9 @@ mod tests {
     // ── Error on unknown command ───────────────────────────────────────
 
     #[test]
-    fn error_on_unknown_command() {
-        let result = Cli::try_parse_from(["ubt", "nonexistent"]);
-        assert!(result.is_err());
+    fn unknown_command_routes_to_external() {
+        let cli = parse(&["ubt", "nonexistent"]);
+        assert!(matches!(cli.command, Command::External(ref args) if args[0] == "nonexistent"));
     }
 
     // ── Completions shell parsing ──────────────────────────────────────

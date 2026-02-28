@@ -10,7 +10,7 @@ use ubt_cli::config::load_config;
 use ubt_cli::detect::detect_tool;
 use ubt_cli::error::UbtError;
 use ubt_cli::executor::{resolve_command, spawn_command, ResolveContext};
-use ubt_cli::plugin::PluginRegistry;
+use ubt_cli::plugin::{PluginRegistry, ResolvedPlugin};
 
 fn main() {
     let cli = Cli::parse();
@@ -61,6 +61,11 @@ fn run(cli: Cli) -> Result<(), UbtError> {
     // Load plugin registry
     let mut registry = PluginRegistry::new()?;
     registry.load_all(Some(&project_root))?;
+
+    // Handle aliases before tool detection
+    if let Command::External(ext_args) = &cli.command {
+        return cmd_alias(ext_args, config);
+    }
 
     // Handle tool subcommands that need the registry
     match &cli.command {
@@ -300,16 +305,96 @@ fn cmd_init() -> Result<(), UbtError> {
         return Ok(());
     }
 
-    // Try to detect the project type for a helpful initial config
     let registry = PluginRegistry::new()?;
-    let content = match detect_tool(None, None, &cwd, &registry) {
+    let (tool, example_cmd) = match detect_tool(None, None, &cwd, &registry) {
         Ok(detection) => {
-            format!("[project]\ntool = \"{}\"\n", detection.variant_name)
+            let example = registry
+                .get(&detection.plugin_name)
+                .and_then(|(plugin, source)| {
+                    plugin
+                        .resolve_variant(&detection.variant_name, source.clone())
+                        .ok()
+                })
+                .and_then(|resolved| init_example_command(&resolved))
+                .unwrap_or_else(|| r#"start = "your-command-here""#.to_string());
+            (detection.variant_name, example)
         }
-        Err(_) => "[project]\n# tool = \"npm\"\n".to_string(),
+        Err(_) => (
+            "npm".to_string(),
+            r#"start = "npm run dev""#.to_string(),
+        ),
     };
+
+    let content = format!(
+        r#"# ubt.toml — Universal Build Tool configuration
+
+[project]
+# Pin the tool/runtime. Remove this line to let ubt auto-detect.
+# Supported: npm, pnpm, yarn, bun, deno, cargo, go, pip, uv, poetry, bundler
+tool = "{tool}"
+
+# Override built-in commands with project-specific shell commands.
+# Available keys: build, start, test, lint, fmt, check, clean, run, exec,
+#   dep.install, dep.remove, dep.update, dep.list, dep.audit, dep.outdated,
+#   db.migrate, db.rollback, db.seed, db.create, db.drop, db.reset, db.status
+# Use {{{{args}}}} to forward extra CLI arguments to the underlying command.
+[commands]
+# {example_cmd}
+# ...
+
+# Add new commands not covered by built-ins.
+# Names must not conflict with built-ins (build, test, dep, db, …).
+[aliases]
+# hello = "echo hello world"
+"#,
+        tool = tool,
+        example_cmd = example_cmd
+    );
 
     std::fs::write(&config_path, &content)?;
     println!("Created {}", config_path.display());
     Ok(())
+}
+
+fn cmd_alias(
+    ext_args: &[String],
+    config: Option<&ubt_cli::config::UbtConfig>,
+) -> Result<(), UbtError> {
+    let alias_name = &ext_args[0];
+    let remaining = &ext_args[1..];
+
+    let cmd_str = config
+        .and_then(|cfg| cfg.aliases.get(alias_name))
+        .ok_or_else(|| UbtError::UnknownCommand {
+            name: alias_name.clone(),
+        })?;
+
+    let args_str = remaining.join(" ");
+    let expanded = if cmd_str.contains("{{args}}") {
+        cmd_str.replace("{{args}}", &args_str)
+    } else if remaining.is_empty() {
+        cmd_str.clone()
+    } else {
+        format!("{} {}", cmd_str, args_str)
+    };
+
+    let exit_code = spawn_command(&expanded, None)?;
+    process::exit(exit_code);
+}
+
+fn init_example_command(resolved: &ResolvedPlugin) -> Option<String> {
+    let preferred = ["start", "build", "test"];
+    for key in &preferred {
+        if let Some(cmd) = resolved.commands.get(*key) {
+            let rendered = cmd.replace("{{tool}}", &resolved.binary);
+            return Some(format!(r#"{key} = "{rendered}""#));
+        }
+    }
+    // fallback: first command alphabetically
+    let mut keys: Vec<&String> = resolved.commands.keys().collect();
+    keys.sort();
+    keys.first().map(|key| {
+        let rendered = resolved.commands[*key].replace("{{tool}}", &resolved.binary);
+        format!(r#"{key} = "{rendered}""#)
+    })
 }

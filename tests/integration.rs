@@ -120,6 +120,79 @@ fn config_show_without_config() {
         .stdout(predicate::str::contains("No ubt.toml found"));
 }
 
+// ── Commands override via ubt.toml ──────────────────────────────────────
+
+#[test]
+fn config_commands_override_is_used() {
+    let dir = TempDir::new().unwrap();
+    std::fs::write(dir.path().join("Cargo.toml"), "[package]\nname=\"x\"\nversion=\"0.1.0\"\nedition=\"2021\"\n").unwrap();
+    std::fs::write(
+        dir.path().join("ubt.toml"),
+        "[project]\ntool = \"cargo\"\n[commands]\nbuild = \"echo custom-build-ran\"\n",
+    )
+    .unwrap();
+
+    ubt()
+        .arg("build")
+        .current_dir(dir.path())
+        .env_remove("UBT_TOOL")
+        .env_remove("UBT_CONFIG")
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("custom-build-ran"));
+}
+
+// ── Aliases from ubt.toml ───────────────────────────────────────────────
+
+#[test]
+fn alias_runs_command() {
+    let dir = TempDir::new().unwrap();
+    std::fs::write(
+        dir.path().join("ubt.toml"),
+        "[aliases]\nhello = \"echo alias-ran\"\n",
+    )
+    .unwrap();
+
+    ubt()
+        .arg("hello")
+        .current_dir(dir.path())
+        .env_remove("UBT_CONFIG")
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("alias-ran"));
+}
+
+#[test]
+fn alias_with_args() {
+    let dir = TempDir::new().unwrap();
+    std::fs::write(
+        dir.path().join("ubt.toml"),
+        "[aliases]\ngreet = \"echo {{args}}\"\n",
+    )
+    .unwrap();
+
+    ubt()
+        .args(["greet", "hello", "world"])
+        .current_dir(dir.path())
+        .env_remove("UBT_CONFIG")
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("hello world"));
+}
+
+#[test]
+fn unknown_command_errors() {
+    let dir = TempDir::new().unwrap();
+
+    ubt()
+        .arg("nonexistent")
+        .current_dir(dir.path())
+        .env_remove("UBT_CONFIG")
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("Unknown command"));
+}
+
 // ── Build in empty dir → error with guidance ────────────────────────────
 
 #[test]

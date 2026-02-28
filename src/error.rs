@@ -43,6 +43,9 @@ pub enum UbtError {
     #[error("Alias \"{alias}\" conflicts with built-in command \"{command}\"")]
     AliasConflict { alias: String, command: String },
 
+    #[error("Unknown command \"{name}\". Run \"ubt --help\" for available commands.")]
+    UnknownCommand { name: String },
+
     #[error(transparent)]
     Io(#[from] std::io::Error),
 }
