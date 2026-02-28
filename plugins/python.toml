@@ -32,7 +32,7 @@ fmt = "python -m black ."
 "fmt.check" = "python -m black --check ."
 run = "python -m {{args}}"
 "run-file" = "python {{file}}"
-clean = "find . -type d -name __pycache__ -exec rm -rf {} + && rm -rf .pytest_cache dist build *.egg-info"
+clean = "sh -c 'find . -type d -name __pycache__ -exec rm -rf {} + && rm -rf .pytest_cache dist build *.egg-info'"
 publish = "python -m twine upload dist/*"
 
 [commands.variants.uv]

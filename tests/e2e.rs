@@ -19,6 +19,22 @@ fn docker_available() -> bool {
 }
 
 fn build_ubt_binary() -> String {
+    // Allow CI to supply a pre-built binary (e.g. a musl-linked one for glibc compatibility).
+    if let Ok(path) = std::env::var("UBT_E2E_BINARY") {
+        let binary = std::path::PathBuf::from(&path);
+        let binary = if binary.is_relative() {
+            std::env::current_dir().unwrap().join(binary)
+        } else {
+            binary
+        };
+        assert!(
+            binary.exists(),
+            "UBT_E2E_BINARY points to missing file: {}",
+            binary.display()
+        );
+        return binary.to_string_lossy().to_string();
+    }
+
     let output = Command::new("cargo")
         .args(["build", "--release"])
         .output()
