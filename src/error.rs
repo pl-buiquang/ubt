@@ -120,10 +120,7 @@ mod tests {
     #[test]
     fn config_error_with_line() {
         let err = UbtError::config_error(Some(42), "invalid key");
-        assert_eq!(
-            err.to_string(),
-            "Error in ubt.toml [line 42]: invalid key"
-        );
+        assert_eq!(err.to_string(), "Error in ubt.toml [line 42]: invalid key");
     }
 
     #[test]

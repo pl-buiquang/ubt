@@ -66,13 +66,13 @@ impl Plugin {
         variant_name: &str,
         source: PluginSource,
     ) -> Result<ResolvedPlugin> {
-        let variant =
-            self.variants
-                .get(variant_name)
-                .ok_or_else(|| UbtError::PluginLoadError {
-                    name: self.name.clone(),
-                    detail: format!("variant '{}' not found", variant_name),
-                })?;
+        let variant = self
+            .variants
+            .get(variant_name)
+            .ok_or_else(|| UbtError::PluginLoadError {
+                name: self.name.clone(),
+                detail: format!("variant '{}' not found", variant_name),
+            })?;
 
         // Start with base commands, then overlay variant-specific overrides
         let mut commands = self.commands.clone();

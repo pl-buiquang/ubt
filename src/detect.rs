@@ -113,8 +113,8 @@ fn detect_at_dir(dir: &Path, registry: &PluginRegistry) -> Vec<DetectMatch> {
 
     for (_name, (plugin, source)) in registry.iter() {
         if plugin_matches_dir(plugin, dir) {
-            let variant = detect_variant(plugin, dir)
-                .unwrap_or_else(|| plugin.default_variant.clone());
+            let variant =
+                detect_variant(plugin, dir).unwrap_or_else(|| plugin.default_variant.clone());
             matches.push(DetectMatch {
                 plugin_name: plugin.name.clone(),
                 variant_name: variant,
@@ -228,10 +228,14 @@ mod tests {
     {
         let _lock = ENV_MUTEX.lock().unwrap_or_else(|e| e.into_inner());
         let prev = std::env::var("UBT_TOOL").ok();
-        unsafe { std::env::remove_var("UBT_TOOL"); }
+        unsafe {
+            std::env::remove_var("UBT_TOOL");
+        }
         let result = f();
         if let Some(v) = prev {
-            unsafe { std::env::set_var("UBT_TOOL", v); }
+            unsafe {
+                std::env::set_var("UBT_TOOL", v);
+            }
         }
         result
     }

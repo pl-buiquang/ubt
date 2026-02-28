@@ -298,7 +298,9 @@ typecheck = "pnpm exec tsc --noEmit"
 
         // Restore env
         if let Some(v) = prev {
-            unsafe { std::env::set_var("UBT_CONFIG", v); }
+            unsafe {
+                std::env::set_var("UBT_CONFIG", v);
+            }
         }
 
         assert_eq!(result.0.project.unwrap().tool.unwrap(), "go");
@@ -317,7 +319,9 @@ typecheck = "pnpm exec tsc --noEmit"
         let result = find_config(dir.path()).unwrap();
 
         if let Some(v) = prev {
-            unsafe { std::env::set_var("UBT_CONFIG", v); }
+            unsafe {
+                std::env::set_var("UBT_CONFIG", v);
+            }
         }
 
         assert!(result.is_none());

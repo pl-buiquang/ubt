@@ -299,10 +299,7 @@ dev = "--mode=development"
     #[test]
     fn go_plugin_unsupported_flags() {
         let plugin = parse_plugin_toml(GO_PLUGIN).unwrap();
-        assert_eq!(
-            plugin.flags["test"]["watch"],
-            FlagTranslation::Unsupported
-        );
+        assert_eq!(plugin.flags["test"]["watch"], FlagTranslation::Unsupported);
         assert_eq!(
             plugin.flags["test"]["coverage"],
             FlagTranslation::Translation("-cover".to_string())
@@ -329,15 +326,9 @@ dev = "--mode=development"
     #[test]
     fn node_plugin_variant_overrides() {
         let plugin = parse_plugin_toml(NODE_PLUGIN).unwrap();
-        assert_eq!(
-            plugin.command_variants["yarn"]["exec"],
-            "yarn dlx {{args}}"
-        );
+        assert_eq!(plugin.command_variants["yarn"]["exec"], "yarn dlx {{args}}");
         assert_eq!(plugin.command_variants["bun"]["exec"], "bunx {{args}}");
-        assert_eq!(
-            plugin.command_variants["deno"]["test"],
-            "deno test"
-        );
+        assert_eq!(plugin.command_variants["deno"]["test"], "deno test");
     }
 
     #[test]
@@ -357,7 +348,9 @@ dev = "--mode=development"
     fn node_plugin_resolve_pnpm() {
         use crate::plugin::PluginSource;
         let plugin = parse_plugin_toml(NODE_PLUGIN).unwrap();
-        let resolved = plugin.resolve_variant("pnpm", PluginSource::BuiltIn).unwrap();
+        let resolved = plugin
+            .resolve_variant("pnpm", PluginSource::BuiltIn)
+            .unwrap();
         // pnpm has no exec override, so it uses base
         assert_eq!(resolved.commands["exec"], "npx {{args}}");
         assert_eq!(resolved.binary, "pnpm");
@@ -367,7 +360,9 @@ dev = "--mode=development"
     fn node_plugin_resolve_yarn() {
         use crate::plugin::PluginSource;
         let plugin = parse_plugin_toml(NODE_PLUGIN).unwrap();
-        let resolved = plugin.resolve_variant("yarn", PluginSource::BuiltIn).unwrap();
+        let resolved = plugin
+            .resolve_variant("yarn", PluginSource::BuiltIn)
+            .unwrap();
         assert_eq!(resolved.commands["exec"], "yarn dlx {{args}}");
         assert_eq!(resolved.commands["dep.install_pkg"], "yarn add {{args}}");
     }
@@ -376,7 +371,9 @@ dev = "--mode=development"
     fn node_plugin_resolve_deno() {
         use crate::plugin::PluginSource;
         let plugin = parse_plugin_toml(NODE_PLUGIN).unwrap();
-        let resolved = plugin.resolve_variant("deno", PluginSource::BuiltIn).unwrap();
+        let resolved = plugin
+            .resolve_variant("deno", PluginSource::BuiltIn)
+            .unwrap();
         assert_eq!(resolved.commands["test"], "deno test");
         assert_eq!(resolved.commands["run"], "deno task {{args}}");
     }
@@ -434,7 +431,10 @@ files = []
 "#;
         let result = parse_plugin_toml(toml);
         assert!(result.is_err());
-        assert!(result.unwrap_err().to_string().contains("detect.files must not be empty"));
+        assert!(result
+            .unwrap_err()
+            .to_string()
+            .contains("detect.files must not be empty"));
     }
 
     #[test]

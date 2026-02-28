@@ -51,9 +51,19 @@ pub fn resolve_command(ctx: &ResolveContext) -> Result<String> {
         if let Some(cmd_str) = cfg.commands.get(command_name) {
             let args_str = remaining_args.join(" ");
             let file_str = ctx.run_file.unwrap_or("");
-            let expanded = expand_template(cmd_str, &plugin.binary, &args_str, file_str, ctx.project_root);
+            let expanded = expand_template(
+                cmd_str,
+                &plugin.binary,
+                &args_str,
+                file_str,
+                ctx.project_root,
+            );
             let with_flags = append_flags(expanded, command_name, plugin, ctx.flags)?;
-            return Ok(append_remaining_if_needed(&with_flags, remaining_args, cmd_str));
+            return Ok(append_remaining_if_needed(
+                &with_flags,
+                remaining_args,
+                cmd_str,
+            ));
         }
     }
 
@@ -73,24 +83,36 @@ pub fn resolve_command(ctx: &ResolveContext) -> Result<String> {
         command_name
     };
 
-    let template = plugin.commands.get(effective_command).ok_or_else(|| {
-        UbtError::CommandUnmapped {
-            command: command_name.to_string(),
-        }
-    })?;
+    let template =
+        plugin
+            .commands
+            .get(effective_command)
+            .ok_or_else(|| UbtError::CommandUnmapped {
+                command: command_name.to_string(),
+            })?;
 
     // 4. Build args string for template expansion
     let args_str = build_args_string(remaining_args, ctx.run_script);
     let file_str = ctx.run_file.unwrap_or("");
 
     // 5. Expand template
-    let expanded = expand_template(template, &plugin.binary, &args_str, file_str, ctx.project_root);
+    let expanded = expand_template(
+        template,
+        &plugin.binary,
+        &args_str,
+        file_str,
+        ctx.project_root,
+    );
 
     // 6. Append translated flags
     let with_flags = append_flags(expanded, command_name, plugin, ctx.flags)?;
 
     // 7. Append remaining args if not already consumed by {{args}}
-    Ok(append_remaining_if_needed(&with_flags, remaining_args, template))
+    Ok(append_remaining_if_needed(
+        &with_flags,
+        remaining_args,
+        template,
+    ))
 }
 
 /// Build the args string for template substitution.
@@ -142,7 +164,10 @@ fn append_flags(
                         return Err(UbtError::CommandUnsupported {
                             command: command_name.to_string(),
                             plugin: plugin.name.clone(),
-                            hint: format!("The --{} flag is not supported for this tool.", flag_name),
+                            hint: format!(
+                                "The --{} flag is not supported for this tool.",
+                                flag_name
+                            ),
                         });
                     }
                 }
@@ -177,7 +202,8 @@ pub fn resolve_alias(alias: &str, config: &UbtConfig) -> Option<String> {
 
 /// Split a command string into parts using shell-words.
 pub fn split_command(cmd: &str) -> Result<Vec<String>> {
-    shell_words::split(cmd).map_err(|e| UbtError::ExecutionError(format!("Failed to parse command: {e}")))
+    shell_words::split(cmd)
+        .map_err(|e| UbtError::ExecutionError(format!("Failed to parse command: {e}")))
 }
 
 /// Execute a command string, replacing the current process on Unix.
@@ -250,8 +276,14 @@ mod tests {
         let mut commands = HashMap::new();
         commands.insert("test".to_string(), "{{tool}} test ./...".to_string());
         commands.insert("build".to_string(), "{{tool}} build ./...".to_string());
-        commands.insert("dep.install".to_string(), "{{tool}} mod download".to_string());
-        commands.insert("dep.install_pkg".to_string(), "{{tool}} get {{args}}".to_string());
+        commands.insert(
+            "dep.install".to_string(),
+            "{{tool}} mod download".to_string(),
+        );
+        commands.insert(
+            "dep.install_pkg".to_string(),
+            "{{tool}} get {{args}}".to_string(),
+        );
         commands.insert("run".to_string(), "{{tool}} run {{args}}".to_string());
         commands.insert("run-file".to_string(), "{{tool}} run {{file}}".to_string());
         commands.insert("fmt".to_string(), "{{tool}} fmt ./...".to_string());
@@ -296,7 +328,13 @@ mod tests {
 
     #[test]
     fn expand_template_args() {
-        let result = expand_template("{{tool}} get {{args}}", "go", "github.com/pkg/errors", "", "/p");
+        let result = expand_template(
+            "{{tool}} get {{args}}",
+            "go",
+            "github.com/pkg/errors",
+            "",
+            "/p",
+        );
         assert_eq!(result, "go get github.com/pkg/errors");
     }
 
@@ -308,7 +346,13 @@ mod tests {
 
     #[test]
     fn expand_template_project_root() {
-        let result = expand_template("cd {{project_root}} && make", "make", "", "", "/home/user/project");
+        let result = expand_template(
+            "cd {{project_root}} && make",
+            "make",
+            "",
+            "",
+            "/home/user/project",
+        );
         assert_eq!(result, "cd /home/user/project && make");
     }
 
@@ -347,7 +391,10 @@ mod tests {
     #[test]
     fn resolve_with_coverage_flag() {
         let plugin = make_test_plugin();
-        let flags = UniversalFlags { coverage: true, ..Default::default() };
+        let flags = UniversalFlags {
+            coverage: true,
+            ..Default::default()
+        };
         let result = resolve_command(&ctx("test", &plugin, &flags, &[], None, None, None)).unwrap();
         assert_eq!(result, "go test ./... -cover");
     }
@@ -355,7 +402,10 @@ mod tests {
     #[test]
     fn resolve_unsupported_flag_errors() {
         let plugin = make_test_plugin();
-        let flags = UniversalFlags { watch: true, ..Default::default() };
+        let flags = UniversalFlags {
+            watch: true,
+            ..Default::default()
+        };
         let result = resolve_command(&ctx("test", &plugin, &flags, &[], None, None, None));
         assert!(result.is_err());
         assert!(result.unwrap_err().to_string().contains("not supported"));
@@ -376,14 +426,18 @@ mod tests {
         let flags = UniversalFlags::default();
         let result = resolve_command(&ctx("deploy", &plugin, &flags, &[], None, None, None));
         assert!(result.is_err());
-        assert!(matches!(result.unwrap_err(), UbtError::CommandUnmapped { .. }));
+        assert!(matches!(
+            result.unwrap_err(),
+            UbtError::CommandUnmapped { .. }
+        ));
     }
 
     #[test]
     fn resolve_dep_install_no_args() {
         let plugin = make_test_plugin();
         let flags = UniversalFlags::default();
-        let result = resolve_command(&ctx("dep.install", &plugin, &flags, &[], None, None, None)).unwrap();
+        let result =
+            resolve_command(&ctx("dep.install", &plugin, &flags, &[], None, None, None)).unwrap();
         assert_eq!(result, "go mod download");
     }
 
@@ -392,7 +446,16 @@ mod tests {
         let plugin = make_test_plugin();
         let flags = UniversalFlags::default();
         let args = vec!["github.com/pkg/errors".to_string()];
-        let result = resolve_command(&ctx("dep.install", &plugin, &flags, &args, None, None, None)).unwrap();
+        let result = resolve_command(&ctx(
+            "dep.install",
+            &plugin,
+            &flags,
+            &args,
+            None,
+            None,
+            None,
+        ))
+        .unwrap();
         assert_eq!(result, "go get github.com/pkg/errors");
     }
 
@@ -402,8 +465,21 @@ mod tests {
         let flags = UniversalFlags::default();
         let mut commands = HashMap::new();
         commands.insert("test".to_string(), "custom-test-runner".to_string());
-        let config = UbtConfig { project: None, commands, aliases: HashMap::new() };
-        let result = resolve_command(&ctx("test", &plugin, &flags, &[], Some(&config), None, None)).unwrap();
+        let config = UbtConfig {
+            project: None,
+            commands,
+            aliases: HashMap::new(),
+        };
+        let result = resolve_command(&ctx(
+            "test",
+            &plugin,
+            &flags,
+            &[],
+            Some(&config),
+            None,
+            None,
+        ))
+        .unwrap();
         assert_eq!(result, "custom-test-runner");
     }
 
@@ -412,7 +488,8 @@ mod tests {
         let plugin = make_test_plugin();
         let flags = UniversalFlags::default();
         let args = vec!["--runInBand".to_string()];
-        let result = resolve_command(&ctx("test", &plugin, &flags, &args, None, None, None)).unwrap();
+        let result =
+            resolve_command(&ctx("test", &plugin, &flags, &args, None, None, None)).unwrap();
         assert_eq!(result, "go test ./... --runInBand");
     }
 
@@ -421,7 +498,16 @@ mod tests {
         let plugin = make_test_plugin();
         let flags = UniversalFlags::default();
         let args = vec!["express".to_string()];
-        let result = resolve_command(&ctx("dep.install", &plugin, &flags, &args, None, None, None)).unwrap();
+        let result = resolve_command(&ctx(
+            "dep.install",
+            &plugin,
+            &flags,
+            &args,
+            None,
+            None,
+            None,
+        ))
+        .unwrap();
         assert_eq!(result, "go get express");
     }
 
@@ -429,7 +515,8 @@ mod tests {
     fn resolve_run_with_script() {
         let plugin = make_test_plugin();
         let flags = UniversalFlags::default();
-        let result = resolve_command(&ctx("run", &plugin, &flags, &[], None, Some("dev"), None)).unwrap();
+        let result =
+            resolve_command(&ctx("run", &plugin, &flags, &[], None, Some("dev"), None)).unwrap();
         assert_eq!(result, "go run dev");
     }
 
@@ -437,7 +524,16 @@ mod tests {
     fn resolve_run_file() {
         let plugin = make_test_plugin();
         let flags = UniversalFlags::default();
-        let result = resolve_command(&ctx("run-file", &plugin, &flags, &[], None, None, Some("main.go"))).unwrap();
+        let result = resolve_command(&ctx(
+            "run-file",
+            &plugin,
+            &flags,
+            &[],
+            None,
+            None,
+            Some("main.go"),
+        ))
+        .unwrap();
         assert_eq!(result, "go run main.go");
     }
 

@@ -25,10 +25,12 @@ fn build_ubt_binary() -> String {
         .expect("failed to build ubt");
     assert!(output.status.success(), "cargo build --release failed");
 
-    let binary = std::env::current_dir()
-        .unwrap()
-        .join("target/release/ubt");
-    assert!(binary.exists(), "ubt binary not found at {}", binary.display());
+    let binary = std::env::current_dir().unwrap().join("target/release/ubt");
+    assert!(
+        binary.exists(),
+        "ubt binary not found at {}",
+        binary.display()
+    );
     binary.to_string_lossy().to_string()
 }
 

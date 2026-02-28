@@ -26,9 +26,7 @@ fn main() {
 }
 
 fn use_color() -> bool {
-    std::env::var("NO_COLOR").is_err()
-        && std::env::var("UBT_NO_COLOR").is_err()
-        && atty_stderr()
+    std::env::var("NO_COLOR").is_err() && std::env::var("UBT_NO_COLOR").is_err() && atty_stderr()
 }
 
 fn atty_stderr() -> bool {
@@ -94,12 +92,13 @@ fn run(cli: Cli) -> Result<(), UbtError> {
     }
 
     // Resolve the plugin variant
-    let (plugin, source) = registry.get(&detection.plugin_name).ok_or_else(|| {
-        UbtError::PluginLoadError {
-            name: detection.plugin_name.clone(),
-            detail: "plugin not found in registry".into(),
-        }
-    })?;
+    let (plugin, source) =
+        registry
+            .get(&detection.plugin_name)
+            .ok_or_else(|| UbtError::PluginLoadError {
+                name: detection.plugin_name.clone(),
+                detail: "plugin not found in registry".into(),
+            })?;
     let resolved = plugin.resolve_variant(&detection.variant_name, source.clone())?;
 
     // Collect flags and remaining args
@@ -160,7 +159,9 @@ fn cmd_info(
         );
     }
 
-    let (plugin, _) = registry.get(&detection.plugin_name).ok_or(UbtError::NoPluginMatch)?;
+    let (plugin, _) = registry
+        .get(&detection.plugin_name)
+        .ok_or(UbtError::NoPluginMatch)?;
 
     println!("Plugin:       {}", detection.plugin_name);
     println!("Variant:      {}", detection.variant_name);
@@ -205,10 +206,7 @@ fn cmd_tool(
                                     );
                                 }
                                 Err(_) => {
-                                    eprintln!(
-                                        "{} is not installed.",
-                                        variant.binary
-                                    );
+                                    eprintln!("{} is not installed.", variant.binary);
                                     if let Some(help) = &plugin.install_help {
                                         eprintln!("Install: {help}");
                                     }
@@ -245,8 +243,7 @@ fn cmd_tool(
         }
         ToolCommand::Docs => {
             let config_tool = config.and_then(|c| c.project.as_ref()?.tool.as_deref());
-            let detection =
-                detect_tool(cli.tool.as_deref(), config_tool, project_root, registry)?;
+            let detection = detect_tool(cli.tool.as_deref(), config_tool, project_root, registry)?;
             if let Some((plugin, _)) = registry.get(&detection.plugin_name) {
                 if let Some(hp) = &plugin.homepage {
                     println!("{hp}");
@@ -307,10 +304,7 @@ fn cmd_init() -> Result<(), UbtError> {
     let registry = PluginRegistry::new()?;
     let content = match detect_tool(None, None, &cwd, &registry) {
         Ok(detection) => {
-            format!(
-                "[project]\ntool = \"{}\"\n",
-                detection.variant_name
-            )
+            format!("[project]\ntool = \"{}\"\n", detection.variant_name)
         }
         Err(_) => "[project]\n# tool = \"npm\"\n".to_string(),
     };
