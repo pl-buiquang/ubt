@@ -9,7 +9,7 @@ See [PLAN.md](specs/PLAN.md) for full task details and dependency graph.
 - [x] **Task 3:** Plugin Data Model — `Plugin`, `DetectConfig`, `Variant`, `FlagTranslation`, `ResolvedPlugin` structs
 - [ ] **Task 4:** Plugin TOML Parsing — Serde deserialization of `.toml` plugin files, validation
 - [ ] **Task 5:** Plugin Loading & Registry — `PluginRegistry`, built-in plugins via `include_str!`, user/project plugin dirs
-- [ ] **Task 6:** Config Parsing — `ubt.toml` parsing (`[project]`, `[commands]`, `[aliases]`), `find_config()`, alias validation
+- [x] **Task 6:** Config Parsing — `ubt.toml` parsing (`[project]`, `[commands]`, `[aliases]`), `find_config()`, alias validation
 - [ ] **Task 7:** Detection Algorithm — CLI override → env var → config → auto-detect, glob patterns, priority resolution
 - [x] **Task 8:** CLI Definition — Full clap derive structure, universal flags, `--tool` flag, command name parsing
 - [ ] **Task 9:** Command Resolution — Alias → config override → plugin mapping → flag translation → template assembly
