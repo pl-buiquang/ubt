@@ -237,6 +237,35 @@ Run real builds against real toolchains inside Docker containers to verify UBT a
 
 ---
 
+## Task 18: crates.io Publishing
+
+**Why:** The crate name `ubt` is taken (https://crates.io/crates/ubt — Ethereum EIP-7864 binary tree).
+
+### Steps
+
+1. **`Cargo.toml`** — rename `[package] name` from `"ubt"` to `"ubt-cli"`; keep `[[bin]] name = "ubt"` so the installed binary is still called `ubt`
+2. **`README.md`** — update badge and `cargo install` command to `ubt-cli`
+3. **`.github/workflows/release.yml`** — add `publish` job after `release`:
+   ```yaml
+   publish:
+     name: Publish to crates.io
+     runs-on: ubuntu-latest
+     needs: release
+     steps:
+       - uses: actions/checkout@v4
+       - uses: dtolnay/rust-toolchain@stable
+       - run: cargo publish --token ${{ secrets.CARGO_REGISTRY_TOKEN }}
+   ```
+
+### One-time manual setup
+1. Create crates.io account at https://crates.io (GitHub login)
+2. Account Settings → API Tokens → New Token (scopes: `publish-new`, `publish-update`)
+3. GitHub repo Settings → Secrets → Actions → add `CARGO_REGISTRY_TOKEN`
+4. First publish: `cargo login <token> && cargo publish` (claims the name)
+5. All future publishes are automated via release workflow
+
+---
+
 ## Verification Strategy
 
 After each task:
