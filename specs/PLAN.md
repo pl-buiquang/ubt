@@ -45,6 +45,7 @@ T1: Boilerplate
 
 T11: Main Pipeline (needs T7, T8, T9, T10)
 T16: Polish (needs all)
+T17: E2E Docker Tests (needs T11, T12, T13, T14)
 ```
 
 ---
@@ -200,6 +201,39 @@ Colored error output (respect `NO_COLOR`/`UBT_NO_COLOR`). `--verbose` prints det
 
 **Files:** `src/error.rs`, `src/main.rs`, `src/config.rs`, `src/cli.rs`
 **Tests:** `UBT_NO_COLOR=1` suppresses ANSI; `--verbose` shows trace; `--version` prints version; comprehensive e2e for each ecosystem.
+
+---
+
+### Task 17: E2E Tests with Docker
+
+Run real builds against real toolchains inside Docker containers to verify UBT actually works end-to-end. Each test spins up a container with the target language toolchain, copies in a tiny "hello world" project plus the UBT binary, and runs core commands (`dep install`, `build`, `test`, `fmt`, `lint`, `clean`).
+
+**Ecosystems to cover (one container each):**
+
+| Ecosystem | Docker Image | Toy Project |
+|-----------|-------------|-------------|
+| Node/npm | `node:22-slim` | `package.json` with a jest test and a single `index.js` |
+| Node/pnpm | `node:22-slim` + `corepack enable` | Same, with `pnpm-lock.yaml` |
+| Go | `golang:1.23-bookworm` | `go.mod` + `main.go` + `main_test.go` |
+| Rust | `rust:1.83-slim-bookworm` | `Cargo.toml` + `src/main.rs` with a test |
+| Python/pip | `python:3.12-slim` | `requirements.txt` + `hello.py` + `test_hello.py` (pytest) |
+| Ruby/bundler | `ruby:3.3-slim` | `Gemfile` + `hello.rb` + `test/test_hello.rb` (minitest) |
+
+**Commands to test per ecosystem** (not exhaustive — focus on the core verbs):
+- `ubt dep install` — installs dependencies successfully
+- `ubt build` — builds (where applicable; skip for Python/Ruby)
+- `ubt test` — runs tests, exits 0
+- `ubt fmt --check` — formatting check exits 0 (pre-formatted projects)
+- `ubt clean` — runs without error
+- `ubt info` — prints detected tool/variant
+
+**Structure:**
+- `tests/e2e/` directory with a `docker/` subdir per ecosystem containing `Dockerfile` + toy project files
+- A shared test harness (bash script or Rust integration test gated behind `#[cfg(feature = "e2e")]` or `#[ignore]`) that builds UBT, builds each Docker image, runs commands, and asserts exit codes / output
+- Tests are `#[ignore]` by default (require `cargo test -- --ignored` or a CI flag) since they need Docker
+
+**Files:** `tests/e2e/`, `tests/e2e/docker/{node,go,rust,python,ruby}/`, test harness script or `tests/e2e.rs`
+**Verify:** `cargo test --test e2e -- --ignored` with Docker running.
 
 ---
 

@@ -20,3 +20,4 @@ See [PLAN.md](specs/PLAN.md) for full task details and dependency graph.
 - [ ] **Task 14:** Built-in Plugins — Python, Rust, Java, Dotnet, Ruby — 5 remaining plugin TOML files
 - [ ] **Task 15:** Shell Completions — Generate completions for bash, zsh, fish, PowerShell via `clap_complete`
 - [ ] **Task 16:** Polish & Edge Cases — Colored errors, `--verbose` trace, `--quiet`, `--version`, config validation
+- [ ] **Task 17:** E2E Docker Tests — Real builds in Docker containers (node, go, rust, python, ruby) against tiny hello-world projects
