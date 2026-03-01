@@ -569,11 +569,11 @@ mod tests {
 
     #[test]
     fn alias_args_substitution() {
-        let mut aliases = HashMap::new();
+        let mut aliases = indexmap::IndexMap::new();
         aliases.insert("test".to_string(), "cargo test {{args}}".to_string());
         let config = UbtConfig {
             project: None,
-            commands: HashMap::new(),
+            commands: indexmap::IndexMap::new(),
             aliases,
         };
         let resolved = resolve_alias("test", &config).unwrap();
@@ -585,11 +585,11 @@ mod tests {
 
     #[test]
     fn alias_multi_word() {
-        let mut aliases = HashMap::new();
+        let mut aliases = indexmap::IndexMap::new();
         aliases.insert("b".to_string(), "cargo build --release".to_string());
         let config = UbtConfig {
             project: None,
-            commands: HashMap::new(),
+            commands: indexmap::IndexMap::new(),
             aliases,
         };
         assert_eq!(
