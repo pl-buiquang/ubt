@@ -1,6 +1,7 @@
 pub mod declarative;
 
 use std::collections::HashMap;
+use std::fmt;
 use std::path::{Path, PathBuf};
 
 use crate::error::{Result, UbtError};
@@ -28,6 +29,24 @@ pub enum FlagTranslation {
 pub enum PluginSource {
     BuiltIn,
     File(PathBuf),
+}
+
+impl fmt::Display for PluginSource {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            PluginSource::BuiltIn => write!(f, "built-in"),
+            PluginSource::File(path) => write!(f, "file plugin at {}", path.display()),
+        }
+    }
+}
+
+impl fmt::Display for FlagTranslation {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            FlagTranslation::Translation(s) => write!(f, "{s}"),
+            FlagTranslation::Unsupported => write!(f, "unsupported"),
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
