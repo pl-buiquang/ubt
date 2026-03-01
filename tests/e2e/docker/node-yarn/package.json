@@ -1,0 +1,11 @@
+{
+  "name": "hello",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "node --test",
+    "build": "echo built",
+    "lint": "echo linted",
+    "format": "echo formatted",
+    "format:check": "echo format ok"
+  }
+}

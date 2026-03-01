@@ -1,0 +1,13 @@
+{
+  "name": "hello",
+  "version": "1.0.0",
+  "devDependencies": {
+    "is-odd": "3.0.1"
+  },
+  "scripts": {
+    "build": "echo built",
+    "lint": "echo linted",
+    "format": "echo formatted",
+    "format:check": "echo format ok"
+  }
+}

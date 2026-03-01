@@ -156,3 +156,66 @@ fn e2e_cpp() {
     }
     assert!(run_docker_build("cpp"), "C/C++ E2E test failed");
 }
+
+#[test]
+#[ignore]
+fn e2e_java_mvn() {
+    if !docker_available() {
+        eprintln!("Docker not available, skipping");
+        return;
+    }
+    assert!(run_docker_build("java-mvn"), "Java/Maven E2E test failed");
+}
+
+#[test]
+#[ignore]
+fn e2e_java_gradle() {
+    if !docker_available() {
+        eprintln!("Docker not available, skipping");
+        return;
+    }
+    assert!(
+        run_docker_build("java-gradle"),
+        "Java/Gradle E2E test failed"
+    );
+}
+
+#[test]
+#[ignore]
+fn e2e_dotnet() {
+    if !docker_available() {
+        eprintln!("Docker not available, skipping");
+        return;
+    }
+    assert!(run_docker_build("dotnet"), ".NET E2E test failed");
+}
+
+#[test]
+#[ignore]
+fn e2e_node_yarn() {
+    if !docker_available() {
+        eprintln!("Docker not available, skipping");
+        return;
+    }
+    assert!(run_docker_build("node-yarn"), "Node/yarn E2E test failed");
+}
+
+#[test]
+#[ignore]
+fn e2e_node_bun() {
+    if !docker_available() {
+        eprintln!("Docker not available, skipping");
+        return;
+    }
+    assert!(run_docker_build("node-bun"), "Node/bun E2E test failed");
+}
+
+#[test]
+#[ignore]
+fn e2e_node_deno() {
+    if !docker_available() {
+        eprintln!("Docker not available, skipping");
+        return;
+    }
+    assert!(run_docker_build("node-deno"), "Node/deno E2E test failed");
+}
