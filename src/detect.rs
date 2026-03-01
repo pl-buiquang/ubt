@@ -56,7 +56,7 @@ fn resolve_explicit_tool(
     if let Some((plugin, source)) = registry.get(tool) {
         return Ok(DetectionResult {
             plugin_name: plugin.name.clone(),
-            variant_name: detect_variant(plugin, start_dir)
+            variant_name: detect_variant(plugin, start_dir)?
                 .unwrap_or_else(|| plugin.default_variant.clone()),
             source: source.clone(),
             project_root: start_dir.to_path_buf(),
@@ -86,7 +86,7 @@ fn auto_detect(start_dir: &Path, registry: &PluginRegistry) -> Result<DetectionR
     let mut current = start_dir.to_path_buf();
 
     loop {
-        let matches = detect_at_dir(&current, registry);
+        let matches = detect_at_dir(&current, registry)?;
         if !matches.is_empty() {
             return resolve_matches(matches, &current);
         }
@@ -108,13 +108,13 @@ struct DetectMatch {
 }
 
 /// Check all plugins for matches in the given directory.
-fn detect_at_dir(dir: &Path, registry: &PluginRegistry) -> Vec<DetectMatch> {
+fn detect_at_dir(dir: &Path, registry: &PluginRegistry) -> Result<Vec<DetectMatch>> {
     let mut matches = Vec::new();
 
     for (_name, (plugin, source)) in registry.iter() {
-        if plugin_matches_dir(plugin, dir) {
+        if plugin_matches_dir(plugin, dir)? {
             let variant =
-                detect_variant(plugin, dir).unwrap_or_else(|| plugin.default_variant.clone());
+                detect_variant(plugin, dir)?.unwrap_or_else(|| plugin.default_variant.clone());
             matches.push(DetectMatch {
                 plugin_name: plugin.name.clone(),
                 variant_name: variant,
@@ -124,58 +124,64 @@ fn detect_at_dir(dir: &Path, registry: &PluginRegistry) -> Vec<DetectMatch> {
         }
     }
 
-    matches
+    Ok(matches)
 }
 
 /// Check if a plugin's detect files are present in the given directory.
-fn plugin_matches_dir(plugin: &Plugin, dir: &Path) -> bool {
-    plugin.detect.files.iter().any(|pattern| {
-        if pattern.contains('*') {
+fn plugin_matches_dir(plugin: &Plugin, dir: &Path) -> Result<bool> {
+    for pattern in &plugin.detect.files {
+        let matched = if pattern.contains('*') {
             // Glob pattern (e.g., "*.csproj")
-            glob_matches(dir, pattern)
+            glob_matches(dir, pattern)?
         } else {
             dir.join(pattern).exists()
+        };
+        if matched {
+            return Ok(true);
         }
-    })
+    }
+    Ok(false)
 }
 
 /// Check if a glob pattern matches any file in the directory.
-fn glob_matches(dir: &Path, pattern: &str) -> bool {
-    let Ok(matcher) = globset::GlobBuilder::new(pattern)
+fn glob_matches(dir: &Path, pattern: &str) -> Result<bool> {
+    let matcher = globset::GlobBuilder::new(pattern)
         .literal_separator(true)
         .build()
         .map(|g| g.compile_matcher())
-    else {
-        return false;
-    };
+        .map_err(|e| UbtError::InvalidGlobPattern {
+            pattern: pattern.to_string(),
+            detail: e.to_string(),
+        })?;
 
     let Ok(entries) = std::fs::read_dir(dir) else {
-        return false;
+        return Ok(false);
     };
 
-    entries.filter_map(|e| e.ok()).any(|entry| {
+    Ok(entries.filter_map(|e| e.ok()).any(|entry| {
         entry
             .file_name()
             .to_str()
             .map(|name| matcher.is_match(name))
             .unwrap_or(false)
-    })
+    }))
 }
 
 /// Detect which variant to use based on lockfile presence.
-fn detect_variant(plugin: &Plugin, dir: &Path) -> Option<String> {
+fn detect_variant(plugin: &Plugin, dir: &Path) -> Result<Option<String>> {
     for (variant_name, variant) in &plugin.variants {
         for detect_file in &variant.detect_files {
-            if detect_file.contains('*') {
-                if glob_matches(dir, detect_file) {
-                    return Some(variant_name.clone());
-                }
-            } else if dir.join(detect_file).exists() {
-                return Some(variant_name.clone());
+            let matched = if detect_file.contains('*') {
+                glob_matches(dir, detect_file)?
+            } else {
+                dir.join(detect_file).exists()
+            };
+            if matched {
+                return Ok(Some(variant_name.clone()));
             }
         }
     }
-    None
+    Ok(None)
 }
 
 /// Resolve multiple matches using priority. Error on ties.

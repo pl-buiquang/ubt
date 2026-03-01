@@ -50,6 +50,9 @@ pub enum UbtError {
     #[error("Unknown command \"{name}\". Run \"ubt --help\" for available commands.")]
     UnknownCommand { name: String },
 
+    #[error("Invalid glob pattern \"{pattern}\": {detail}")]
+    InvalidGlobPattern { pattern: String, detail: String },
+
     #[error(transparent)]
     Io(#[from] std::io::Error),
 }
