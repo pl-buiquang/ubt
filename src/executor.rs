@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::fmt::Write;
 
 use crate::cli::UniversalFlags;
 use crate::config::UbtConfig;
@@ -173,11 +174,11 @@ fn append_flags(
                 }
             } else {
                 // No translation defined — pass through as-is
-                cmd.push_str(&format!(" --{}", flag_name));
+                let _ = write!(cmd, " --{}", flag_name);
             }
         } else {
             // No flag section for this command — pass through
-            cmd.push_str(&format!(" --{}", flag_name));
+            let _ = write!(cmd, " --{}", flag_name);
         }
     }
 
