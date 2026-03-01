@@ -108,24 +108,15 @@ BUILTIN_COMMANDS.contains(&alias.as_str())
 
 ## 4. Module Organization (🟡 Medium)
 
-### 4.1 `executor.rs` is a 600-line monolith
+### 4.1 `executor.rs` split — evaluated and skipped
 
-**File:** `src/executor.rs` (~601 lines)
+**File:** `src/executor.rs`
 
-The file mixes five distinct concerns: template expansion, command resolution, flag translation, alias resolution, and process spawning.
+Evaluated splitting into `resolve.rs`, `expand.rs`, `flags.rs`, `process.rs`. The file is ~277 lines of logic with ~360 lines of tests. Splitting into 4 submodules would be overengineering at the current project size — the file-hopping overhead outweighs any organizational benefit.
 
-**Fix:** Split into a module:
+**Decision:** Intentionally skipped. Revisit if the file grows significantly.
 
-```
-src/executor/
-  mod.rs       — public API, re-exports
-  resolve.rs   — command/alias resolution
-  expand.rs    — template substitution
-  flags.rs     — flag translation
-  process.rs   — process spawning + exit-code handling
-```
-
-→ **TODO Task 25**
+→ **TODO Task 25** (skipped)
 
 ### 4.2 `main.rs` contains command handler logic
 
