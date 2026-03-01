@@ -40,3 +40,16 @@ See [PLAN.md](specs/PLAN.md) for full task details and dependency graph.
 - [x] **Task 34:** Use `write!` instead of `format!` + `push_str` in `executor.rs` — replace `cmd.push_str(&format!(" --{}", flag_name))` with `write!(cmd, " --{}", flag_name).unwrap()` to avoid temporary `String` allocation (see `specs/IMPROVEMENTS.md` §2.4)
 - [x] **Task 35:** Add doc comments to public items — add `///` doc comments to `resolve_command()` in `src/executor.rs`, `ResolvedPlugin` and `PluginRegistry` in `src/plugin/mod.rs` (see `specs/IMPROVEMENTS.md` §7.1)
 - [x] **Task 36:** Include span in TOML parse errors — in `src/plugin/declarative.rs:62`, include `e.span()` in the error message for better diagnostics (see `specs/IMPROVEMENTS.md` §7.2)
+
+## v1.0.0 Preparation
+
+- [x] **Task 37:** Use `execute_command` instead of `spawn_command` in `main.rs` — fixes signal forwarding, process replacement on Unix, and exit-code accuracy (see `specs/IMPROVEMENTS_2.md` §1.1)
+- [x] **Task 38:** Implement `--quiet` flag — gate all non-error output behind `if !flags.quiet` throughout the main pipeline (see `specs/IMPROVEMENTS_2.md` §1.2)
+- [x] **Task 39:** Fix `detect_variant_literal` swallowing glob errors — return `Result<Option<String>, UbtError>` and propagate errors from `glob_matches()` (see `specs/IMPROVEMENTS_2.md` §1.3)
+- [x] **Task 40:** Replace `HashMap` with `IndexMap` in `PluginRegistry` — ensures deterministic plugin listing and stable auto-detection priority (see `specs/IMPROVEMENTS_2.md` §1.4)
+- [x] **Task 41:** Use `std::env::split_paths()` for `UBT_PLUGIN_PATH` — replaces hardcoded `:` split with a cross-platform path separator (see `specs/IMPROVEMENTS_2.md` §1.5)
+- [x] **Task 42:** Preserve TOML error details in `load_dir` — include error message and span in the warning instead of discarding them (see `specs/IMPROVEMENTS_2.md` §1.6)
+- [x] **Task 43:** Add `schema_version` field to plugin TOML format — enables forward-compatible plugin loading with a warning on unknown versions (see `specs/IMPROVEMENTS_2.md` §1.7)
+- [x] **Task 44:** `tool docs --open` — open system browser via the `open` crate instead of only printing the URL (see `specs/IMPROVEMENTS_2.md` §2.1)
+- [x] **Task 45:** Expand `--verbose` tracing — add trace output for alias resolution, flag translation, config source, and final assembled command (see `specs/IMPROVEMENTS_2.md` §2.2)
+- [x] **Task 46:** Expand `tool doctor` — check tool versions, validate `ubt.toml`, detect plugin conflicts, verify alias targets (see `specs/IMPROVEMENTS_2.md` §2.3)
