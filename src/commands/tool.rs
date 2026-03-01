@@ -206,3 +206,103 @@ pub fn cmd_tool(
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::cli::{Command, DocsArgs};
+    use crate::plugin::{PluginRegistry, PluginSource};
+    use tempfile::TempDir;
+
+    fn make_cli(quiet: bool, tool: Option<&str>) -> Cli {
+        Cli {
+            verbose: false,
+            quiet,
+            tool: tool.map(|s| s.to_string()),
+            command: Command::Info,
+        }
+    }
+
+    #[test]
+    fn cmd_tool_list_non_quiet_returns_ok() {
+        let registry = PluginRegistry::new().unwrap();
+        let dir = TempDir::new().unwrap();
+        let cli = make_cli(false, None);
+        let result = cmd_tool(&ToolCommand::List, &cli, None, dir.path(), &registry);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn cmd_tool_list_quiet_returns_ok() {
+        let registry = PluginRegistry::new().unwrap();
+        let dir = TempDir::new().unwrap();
+        let cli = make_cli(true, None);
+        let result = cmd_tool(&ToolCommand::List, &cli, None, dir.path(), &registry);
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn cmd_tool_docs_with_homepage_returns_ok() {
+        let registry = PluginRegistry::new().unwrap();
+        let dir = TempDir::new().unwrap();
+        // go plugin has a homepage; cli.tool forces selection without needing go.mod
+        let cli = make_cli(false, Some("go"));
+        let docs_args = DocsArgs { open: false };
+        let result = cmd_tool(
+            &ToolCommand::Docs(docs_args),
+            &cli,
+            None,
+            dir.path(),
+            &registry,
+        );
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn cmd_tool_docs_quiet_with_homepage_returns_ok() {
+        let registry = PluginRegistry::new().unwrap();
+        let dir = TempDir::new().unwrap();
+        let cli = make_cli(true, Some("go"));
+        let docs_args = DocsArgs { open: false };
+        let result = cmd_tool(
+            &ToolCommand::Docs(docs_args),
+            &cli,
+            None,
+            dir.path(),
+            &registry,
+        );
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn cmd_tool_docs_no_homepage_returns_ok() {
+        let dir = TempDir::new().unwrap();
+        // Create a plugin with no homepage
+        let toml = r#"
+[plugin]
+name = "nohp"
+
+[detect]
+files = ["nohp.txt"]
+
+[variants.default]
+binary = "echo"
+"#;
+        std::fs::write(dir.path().join("nohp.toml"), toml).unwrap();
+        let mut registry = PluginRegistry::new().unwrap();
+        registry
+            .load_dir(dir.path(), PluginSource::File(dir.path().to_path_buf()))
+            .unwrap();
+
+        let cli = make_cli(false, Some("nohp"));
+        let docs_args = DocsArgs { open: false };
+        let result = cmd_tool(
+            &ToolCommand::Docs(docs_args),
+            &cli,
+            None,
+            dir.path(),
+            &registry,
+        );
+        assert!(result.is_ok());
+    }
+}

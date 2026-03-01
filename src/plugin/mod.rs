@@ -455,4 +455,78 @@ binary = "go"
         let names = registry.names();
         assert!(names.len() >= 9);
     }
+
+    // ── Display impl tests ──────────────────────────────────────────────
+
+    #[test]
+    fn plugin_source_display_builtin() {
+        assert_eq!(PluginSource::BuiltIn.to_string(), "built-in");
+    }
+
+    #[test]
+    fn plugin_source_display_file() {
+        let s = PluginSource::File(PathBuf::from("/some/path/go.toml"));
+        let display = s.to_string();
+        assert!(display.contains("file plugin at"), "got: {display}");
+        assert!(display.contains("go.toml"), "got: {display}");
+    }
+
+    #[test]
+    fn flag_translation_display_translation() {
+        let t = FlagTranslation::Translation("--verbose".to_string());
+        assert_eq!(t.to_string(), "--verbose");
+    }
+
+    #[test]
+    fn flag_translation_display_unsupported() {
+        assert_eq!(FlagTranslation::Unsupported.to_string(), "unsupported");
+    }
+
+    // ── load_dir error propagation ──────────────────────────────────────
+
+    #[test]
+    fn load_dir_invalid_toml_returns_error_with_detail() {
+        let dir = tempfile::TempDir::new().unwrap();
+        std::fs::write(dir.path().join("bad.toml"), "[invalid toml").unwrap();
+
+        let mut registry = PluginRegistry::new().unwrap();
+        let result = registry.load_dir(dir.path(), PluginSource::File(dir.path().to_path_buf()));
+        assert!(result.is_err());
+        let msg = result.unwrap_err().to_string();
+        assert!(
+            msg.contains("failed to parse plugin TOML"),
+            "unexpected error: {msg}"
+        );
+    }
+
+    // ── UBT_PLUGIN_PATH loading ─────────────────────────────────────────
+
+    #[test]
+    fn load_all_loads_plugins_from_ubt_plugin_path() {
+        let dir = tempfile::TempDir::new().unwrap();
+        let toml = r#"
+[plugin]
+name = "env-path-plugin"
+
+[detect]
+files = ["env.txt"]
+
+[variants.default]
+binary = "env-tool"
+"#;
+        std::fs::write(dir.path().join("env.toml"), toml).unwrap();
+
+        temp_env::with_var(
+            "UBT_PLUGIN_PATH",
+            Some(dir.path().to_str().unwrap()),
+            || {
+                let mut registry = PluginRegistry::new().unwrap();
+                registry.load_all(None).unwrap();
+                assert!(
+                    registry.get("env-path-plugin").is_some(),
+                    "plugin not loaded from UBT_PLUGIN_PATH"
+                );
+            },
+        );
+    }
 }

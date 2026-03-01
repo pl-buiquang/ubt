@@ -283,3 +283,181 @@ fn version_exits_success() {
         .success()
         .stdout(predicate::str::contains("ubt"));
 }
+
+// ── Tool doctor ──────────────────────────────────────────────────────────
+
+#[test]
+fn tool_doctor_in_rust_project() {
+    // cargo is guaranteed to be in PATH when running `cargo test`
+    let dir = TempDir::new().unwrap();
+    std::fs::write(
+        dir.path().join("Cargo.toml"),
+        "[package]\nname = \"test\"\nversion = \"0.1.0\"\nedition = \"2021\"\n",
+    )
+    .unwrap();
+
+    ubt()
+        .args(["tool", "doctor"])
+        .current_dir(dir.path())
+        .env_remove("UBT_TOOL")
+        .env_remove("UBT_CONFIG")
+        .assert()
+        .success();
+}
+
+#[test]
+fn tool_doctor_in_empty_dir_fails() {
+    let dir = TempDir::new().unwrap();
+
+    ubt()
+        .args(["tool", "doctor"])
+        .current_dir(dir.path())
+        .env_remove("UBT_TOOL")
+        .env_remove("UBT_CONFIG")
+        .assert()
+        .failure()
+        .stderr(predicate::str::contains("[fail]"));
+}
+
+#[test]
+fn tool_doctor_warns_on_unknown_alias_target() {
+    let dir = TempDir::new().unwrap();
+    std::fs::write(
+        dir.path().join("Cargo.toml"),
+        "[package]\nname = \"test\"\nversion = \"0.1.0\"\nedition = \"2021\"\n",
+    )
+    .unwrap();
+    std::fs::write(
+        dir.path().join("ubt.toml"),
+        "[aliases]\nmyalias = \"unknown-command-xyz\"\n",
+    )
+    .unwrap();
+
+    ubt()
+        .args(["tool", "doctor"])
+        .current_dir(dir.path())
+        .env_remove("UBT_TOOL")
+        .env_remove("UBT_CONFIG")
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("[warn]"))
+        .stdout(predicate::str::contains("unknown-command-xyz"));
+}
+
+// ── Quiet mode ───────────────────────────────────────────────────────────
+
+#[test]
+fn tool_list_quiet_produces_no_output() {
+    ubt()
+        .args(["--quiet", "tool", "list"])
+        .assert()
+        .success()
+        .stdout(predicate::str::is_empty());
+}
+
+#[test]
+fn info_quiet_produces_no_stdout() {
+    let dir = TempDir::new().unwrap();
+    std::fs::write(dir.path().join("go.mod"), "module foo").unwrap();
+
+    ubt()
+        .args(["--quiet", "info"])
+        .current_dir(dir.path())
+        .env_remove("UBT_TOOL")
+        .env_remove("UBT_CONFIG")
+        .assert()
+        .success()
+        .stdout(predicate::str::is_empty());
+}
+
+// ── Init command ─────────────────────────────────────────────────────────
+
+#[test]
+fn init_already_exists_prints_message() {
+    let dir = TempDir::new().unwrap();
+    std::fs::write(dir.path().join("ubt.toml"), "[project]\ntool = \"go\"\n").unwrap();
+
+    ubt()
+        .arg("init")
+        .current_dir(dir.path())
+        .env_remove("UBT_TOOL")
+        .env_remove("UBT_CONFIG")
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("already exists"));
+}
+
+// ── Config show with aliases ─────────────────────────────────────────────
+
+#[test]
+fn config_show_with_aliases_section() {
+    let dir = TempDir::new().unwrap();
+    std::fs::write(
+        dir.path().join("ubt.toml"),
+        "[project]\ntool = \"go\"\n\n[aliases]\nhello = \"echo hello\"\n",
+    )
+    .unwrap();
+
+    ubt()
+        .args(["config", "show"])
+        .current_dir(dir.path())
+        .env_remove("UBT_CONFIG")
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("Aliases:"))
+        .stdout(predicate::str::contains("hello"));
+}
+
+// ── Verbose output ───────────────────────────────────────────────────────
+
+#[test]
+fn verbose_shows_config_source() {
+    let dir = TempDir::new().unwrap();
+    std::fs::write(dir.path().join("go.mod"), "module foo").unwrap();
+    std::fs::write(dir.path().join("ubt.toml"), "[project]\ntool = \"go\"\n").unwrap();
+
+    ubt()
+        .args(["-v", "info"])
+        .current_dir(dir.path())
+        .env_remove("UBT_TOOL")
+        .env_remove("UBT_CONFIG")
+        .assert()
+        .success()
+        .stderr(predicate::str::contains("ubt: config:"));
+}
+
+#[test]
+fn verbose_shows_tool_source_cli_flag() {
+    let dir = TempDir::new().unwrap();
+    std::fs::write(dir.path().join("go.mod"), "module foo").unwrap();
+
+    // "tool source" is printed for regular commands (build/test/etc.), not for `info`
+    // Use `build` so the verbose path is exercised; don't assert success since
+    // `go build` may not be installed on the test machine.
+    ubt()
+        .args(["-v", "--tool", "go", "build"])
+        .current_dir(dir.path())
+        .env_remove("UBT_TOOL")
+        .env_remove("UBT_CONFIG")
+        .assert()
+        .stderr(predicate::str::contains(
+            "ubt: tool source: CLI --tool flag",
+        ));
+}
+
+// ── Tool docs ────────────────────────────────────────────────────────────
+
+#[test]
+fn tool_docs_prints_homepage_url() {
+    let dir = TempDir::new().unwrap();
+    std::fs::write(dir.path().join("go.mod"), "module foo").unwrap();
+
+    ubt()
+        .args(["tool", "docs"])
+        .current_dir(dir.path())
+        .env_remove("UBT_TOOL")
+        .env_remove("UBT_CONFIG")
+        .assert()
+        .success()
+        .stdout(predicate::str::contains("go.dev"));
+}

@@ -472,4 +472,54 @@ name = "bad"
         let result = parse_plugin_toml(toml);
         assert!(result.is_err());
     }
+
+    #[test]
+    fn schema_version_future_parses_successfully() {
+        // Plugins with a future schema_version should still parse; a warning is emitted
+        // to stderr but we can't easily capture that in a unit test.
+        let toml = r#"
+schema_version = 99
+
+[plugin]
+name = "future-plugin"
+
+[detect]
+files = ["future.txt"]
+
+[variants.default]
+binary = "future-tool"
+"#;
+        let plugin = parse_plugin_toml(toml).unwrap();
+        assert_eq!(plugin.name, "future-plugin");
+    }
+
+    #[test]
+    fn schema_version_current_parses_without_warning() {
+        let toml = r#"
+schema_version = 1
+
+[plugin]
+name = "current-plugin"
+
+[detect]
+files = ["current.txt"]
+
+[variants.default]
+binary = "current-tool"
+"#;
+        let plugin = parse_plugin_toml(toml).unwrap();
+        assert_eq!(plugin.name, "current-plugin");
+    }
+
+    #[test]
+    fn toml_parse_error_message_contains_detail() {
+        // Verify the error message comes from the span-aware formatting path
+        let result = parse_plugin_toml("not valid toml ===");
+        assert!(result.is_err());
+        let msg = result.unwrap_err().to_string();
+        assert!(
+            msg.contains("TOML parse error"),
+            "unexpected message: {msg}"
+        );
+    }
 }
