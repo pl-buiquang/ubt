@@ -3,6 +3,7 @@
 > One CLI to build, test, run, and manage dependencies across every ecosystem.
 
 [![CI](https://github.com/pl-buiquang/ubt/actions/workflows/ci.yml/badge.svg)](https://github.com/pl-buiquang/ubt/actions/workflows/ci.yml)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=pl-buiquang_ubt&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=pl-buiquang_ubt)
 [![Latest Release](https://img.shields.io/github/v/release/pl-buiquang/ubt)](https://github.com/pl-buiquang/ubt/releases/latest)
 [![Crates.io](https://img.shields.io/crates/v/ubt-cli)](https://crates.io/crates/ubt-cli)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
