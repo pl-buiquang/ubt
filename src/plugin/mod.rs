@@ -217,10 +217,9 @@ impl PluginRegistry {
             self.load_dir(&user_dir, PluginSource::File(user_dir.clone()))?;
         }
 
-        // UBT_PLUGIN_PATH
+        // UBT_PLUGIN_PATH (uses std::env::split_paths for cross-platform separator handling)
         if let Ok(plugin_path) = std::env::var("UBT_PLUGIN_PATH") {
-            for dir in plugin_path.split(':') {
-                let path = PathBuf::from(dir);
+            for path in std::env::split_paths(&plugin_path) {
                 self.load_dir(&path, PluginSource::File(path.clone()))?;
             }
         }
