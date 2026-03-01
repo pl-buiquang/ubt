@@ -13,13 +13,17 @@ pub fn cmd_info(
     let config_tool = config.and_then(|c| c.project.as_ref()?.tool.as_deref());
     let detection = detect_tool(cli.tool.as_deref(), config_tool, project_root, registry)?;
 
-    if cli.verbose {
+    if cli.verbose && !cli.quiet {
         eprintln!(
             "ubt: detected {} (variant: {}) at {}",
             detection.plugin_name,
             detection.variant_name,
             detection.project_root.display()
         );
+    }
+
+    if cli.quiet {
+        return Ok(());
     }
 
     let (plugin, _) = registry

@@ -26,12 +26,14 @@ pub fn cmd_tool(
                     {
                         match which::which(&variant.binary) {
                             Ok(path) => {
-                                println!(
-                                    "{} {} is installed at {}",
-                                    detection.plugin_name,
-                                    variant.binary,
-                                    path.display()
-                                );
+                                if !cli.quiet {
+                                    println!(
+                                        "{} {} is installed at {}",
+                                        detection.plugin_name,
+                                        variant.binary,
+                                        path.display()
+                                    );
+                                }
                             }
                             Err(_) => {
                                 eprintln!("{} is not installed.", variant.binary);
@@ -51,19 +53,21 @@ pub fn cmd_tool(
             }
         }
         ToolCommand::List => {
-            println!("{:<12} {:<30} Variants", "Plugin", "Description");
-            println!("{}", "-".repeat(70));
-            let mut names: Vec<_> = registry.names();
-            names.sort();
-            for name in names {
-                if let Some((plugin, _)) = registry.get(name) {
-                    let variants: Vec<_> = plugin.variants.keys().cloned().collect();
-                    println!(
-                        "{:<12} {:<30} {}",
-                        plugin.name,
-                        plugin.description,
-                        variants.join(", ")
-                    );
+            if !cli.quiet {
+                println!("{:<12} {:<30} Variants", "Plugin", "Description");
+                println!("{}", "-".repeat(70));
+                let mut names: Vec<_> = registry.names();
+                names.sort();
+                for name in names {
+                    if let Some((plugin, _)) = registry.get(name) {
+                        let variants: Vec<_> = plugin.variants.keys().cloned().collect();
+                        println!(
+                            "{:<12} {:<30} {}",
+                            plugin.name,
+                            plugin.description,
+                            variants.join(", ")
+                        );
+                    }
                 }
             }
             Ok(())
@@ -76,12 +80,14 @@ pub fn cmd_tool(
                     if args.open {
                         if let Err(e) = open::that(hp) {
                             eprintln!("ubt: could not open browser: {e}");
-                            println!("{hp}");
+                            if !cli.quiet {
+                                println!("{hp}");
+                            }
                         }
-                    } else {
+                    } else if !cli.quiet {
                         println!("{hp}");
                     }
-                } else {
+                } else if !cli.quiet {
                     println!("No documentation URL configured for {}", plugin.name);
                 }
             }

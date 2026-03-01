@@ -88,7 +88,7 @@ fn run(cli: Cli) -> Result<(), UbtError> {
     let config_tool = config.and_then(|c| c.project.as_ref()?.tool.as_deref());
     let detection = detect_tool(cli.tool.as_deref(), config_tool, &project_root, &registry)?;
 
-    if cli.verbose {
+    if cli.verbose && !cli.quiet {
         eprintln!(
             "ubt: detected {} (variant: {}) at {}",
             detection.plugin_name,
@@ -134,12 +134,8 @@ fn run(cli: Cli) -> Result<(), UbtError> {
         project_root: &project_root_str,
     })?;
 
-    if cli.verbose {
+    if cli.verbose && !cli.quiet {
         eprintln!("ubt: executing: {cmd_str}");
-    }
-
-    if cli.quiet {
-        // In quiet mode, suppress our own output but still run the command
     }
 
     // Execute (replaces current process on Unix via exec())
