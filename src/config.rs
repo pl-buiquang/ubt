@@ -85,16 +85,16 @@ pub fn parse_config(content: &str) -> Result<UbtConfig> {
 /// Ensure no alias shadows a built-in command or group name.
 pub fn validate_aliases(config: &UbtConfig) -> Result<()> {
     for alias in config.aliases.keys() {
-        if let Some(&cmd) = BUILTIN_COMMANDS.iter().find(|&&c| c == alias.as_str()) {
+        if BUILTIN_COMMANDS.contains(&alias.as_str()) {
             return Err(UbtError::AliasConflict {
                 alias: alias.clone(),
-                command: cmd.to_string(),
+                command: alias.clone(),
             });
         }
-        if let Some(&group) = BUILTIN_GROUPS.iter().find(|&&g| g == alias.as_str()) {
+        if BUILTIN_GROUPS.contains(&alias.as_str()) {
             return Err(UbtError::AliasConflict {
                 alias: alias.clone(),
-                command: group.to_string(),
+                command: alias.clone(),
             });
         }
     }
