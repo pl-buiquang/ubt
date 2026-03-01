@@ -189,10 +189,10 @@ impl PluginRegistry {
 
         for entry in entries {
             let content = std::fs::read_to_string(entry.path())?;
-            let plugin = declarative::parse_plugin_toml(&content).map_err(|_| {
+            let plugin = declarative::parse_plugin_toml(&content).map_err(|e| {
                 UbtError::PluginLoadError {
                     name: entry.path().display().to_string(),
-                    detail: "failed to parse plugin TOML".into(),
+                    detail: format!("failed to parse plugin TOML: {e}"),
                 }
             })?;
             let file_source = match &source {
