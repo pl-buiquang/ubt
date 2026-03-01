@@ -25,7 +25,7 @@ See [PLAN.md](specs/PLAN.md) for full task details and dependency graph.
 - [ ] **Task 19:** Streamline releases with `cargo-release` — install `cargo-release`, add a `release.toml` config (`publish = false`, `tag-name = "{{version}}"`, conventional commit message), so `cargo release X.Y.Z --execute` replaces the manual 4-step bump/commit/tag/push process
 - [ ] **Task 20:** Fix unsafe env var usage in tests — replace `unsafe { env::set_var }` in `config.rs` and `detect.rs` tests with `temp-env` crate or parameter injection (see `specs/IMPROVEMENTS.md` §1.1)
 - [ ] **Task 21:** Fix silent glob failures in `detect.rs` — `glob_matches()` silently returns `false` on bad patterns; return `Result<bool>` and propagate the error (see `specs/IMPROVEMENTS.md` §1.2)
-- [ ] **Task 22:** Add Unix signal exit-code forwarding — `executor.rs:245` maps signal-killed process to exit code 1; use `ExitStatusExt::signal()` for `128 + signal` (see `specs/IMPROVEMENTS.md` §1.3)
+- [x] **Task 22:** Add Unix signal exit-code forwarding — `executor.rs:245` maps signal-killed process to exit code 1; use `ExitStatusExt::signal()` for `128 + signal` (see `specs/IMPROVEMENTS.md` §1.3)
 - [ ] **Task 23:** Deduplicate CLI match arms in `cli.rs` — extract `command_parts()` helper to replace the mirrored 40-arm blocks in `parse_command_name` and `collect_remaining_args` (see `specs/IMPROVEMENTS.md` §2.1)
 - [ ] **Task 24:** Cache glob pattern compilation in `detect.rs` — pre-compile `GlobBuilder` patterns at plugin load time instead of rebuilding on every detection call (see `specs/IMPROVEMENTS.md` §3.1)
 - [ ] **Task 25:** Split `executor.rs` into focused submodules — create `src/executor/{resolve,expand,flags,process}.rs` to separate concerns (see `specs/IMPROVEMENTS.md` §4.1)

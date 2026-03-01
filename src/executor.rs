@@ -265,7 +265,15 @@ pub fn spawn_command(cmd: &str, install_help: Option<&str>) -> Result<i32> {
         .status()
         .map_err(|e| UbtError::ExecutionError(format!("spawn failed: {e}")))?;
 
-    Ok(status.code().unwrap_or(1))
+    Ok(status.code().unwrap_or_else(|| {
+        #[cfg(unix)]
+        {
+            use std::os::unix::process::ExitStatusExt;
+            status.signal().map(|s| 128 + s).unwrap_or(1)
+        }
+        #[cfg(not(unix))]
+        1
+    }))
 }
 
 #[cfg(test)]
