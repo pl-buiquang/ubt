@@ -59,6 +59,15 @@ fn run(cli: Cli) -> Result<(), UbtError> {
         None => (None, cwd.clone()),
     };
 
+    let verbose = cli.verbose && !cli.quiet;
+
+    if verbose {
+        match &config_result {
+            Some((_, r)) => eprintln!("ubt: config: {}", r.join("ubt.toml").display()),
+            None => eprintln!("ubt: config: none found"),
+        }
+    }
+
     // Load plugin registry
     let mut registry = PluginRegistry::new()?;
     registry.load_all(Some(&project_root))?;
@@ -81,14 +90,28 @@ fn run(cli: Cli) -> Result<(), UbtError> {
 
     // Check for alias first
     let command_name = parse_command_name(&cli.command);
-    // Note: aliases are checked separately from the command enum since they'd
-    // need custom parsing. For now, aliases are accessible via config commands.
 
-    // Detect tool
+    if verbose {
+        eprintln!("ubt: command: {command_name}");
+    }
+
+    // Detect tool — priority: CLI flag > UBT_TOOL env > config > auto-detect
     let config_tool = config.and_then(|c| c.project.as_ref()?.tool.as_deref());
+    if verbose {
+        let source = if cli.tool.is_some() {
+            "CLI --tool flag"
+        } else if std::env::var("UBT_TOOL").is_ok() {
+            "UBT_TOOL env var"
+        } else if config_tool.is_some() {
+            "ubt.toml [project].tool"
+        } else {
+            "auto-detect"
+        };
+        eprintln!("ubt: tool source: {source}");
+    }
     let detection = detect_tool(cli.tool.as_deref(), config_tool, &project_root, &registry)?;
 
-    if cli.verbose && !cli.quiet {
+    if verbose {
         eprintln!(
             "ubt: detected {} (variant: {}) at {}",
             detection.plugin_name,
@@ -105,11 +128,20 @@ fn run(cli: Cli) -> Result<(), UbtError> {
                 name: detection.plugin_name.clone(),
                 detail: "plugin not found in registry".into(),
             })?;
+
+    if verbose {
+        eprintln!("ubt: plugin source: {source}");
+    }
+
     let resolved = plugin.resolve_variant(&detection.variant_name, source.clone())?;
 
     // Collect flags and remaining args
     let flags = collect_universal_flags(&cli.command);
     let remaining_args = collect_remaining_args(&cli.command);
+
+    if verbose {
+        eprintln!("ubt: binary: {}", resolved.binary);
+    }
 
     // Extract run script/file if applicable
     let run_script = match &cli.command {
@@ -134,7 +166,7 @@ fn run(cli: Cli) -> Result<(), UbtError> {
         project_root: &project_root_str,
     })?;
 
-    if cli.verbose && !cli.quiet {
+    if verbose {
         eprintln!("ubt: executing: {cmd_str}");
     }
 
