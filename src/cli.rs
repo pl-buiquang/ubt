@@ -357,54 +357,60 @@ pub struct UniversalFlags {
 
 // ── Helper functions ───────────────────────────────────────────────────
 
-/// Returns a dot-notation name for the given command variant.
-pub fn parse_command_name(cmd: &Command) -> &'static str {
+/// Returns the dot-notation command name and an optional reference to the
+/// passthrough args vec for the given command variant.
+pub fn command_parts(cmd: &Command) -> (&'static str, Option<&Vec<String>>) {
     match cmd {
         Command::Dep(sub) => match sub {
-            DepCommand::Install(..) => "dep.install",
-            DepCommand::Remove(..) => "dep.remove",
-            DepCommand::Update(..) => "dep.update",
-            DepCommand::Outdated(..) => "dep.outdated",
-            DepCommand::List(..) => "dep.list",
-            DepCommand::Audit(..) => "dep.audit",
-            DepCommand::Lock(..) => "dep.lock",
-            DepCommand::Why(..) => "dep.why",
+            DepCommand::Install(a) => ("dep.install", Some(&a.args)),
+            DepCommand::Remove(a) => ("dep.remove", Some(&a.args)),
+            DepCommand::Update(a) => ("dep.update", Some(&a.args)),
+            DepCommand::Outdated(a) => ("dep.outdated", Some(&a.args)),
+            DepCommand::List(a) => ("dep.list", Some(&a.args)),
+            DepCommand::Audit(a) => ("dep.audit", Some(&a.args)),
+            DepCommand::Lock(a) => ("dep.lock", Some(&a.args)),
+            DepCommand::Why(a) => ("dep.why", Some(&a.args)),
         },
-        Command::Build(..) => "build",
-        Command::Start(..) => "start",
-        Command::Run(..) => "run",
-        Command::Fmt(..) => "fmt",
-        Command::RunFile(..) => "run-file",
-        Command::Exec(..) => "exec",
-        Command::Test(..) => "test",
-        Command::Lint(..) => "lint",
-        Command::Check(..) => "check",
+        Command::Build(a) => ("build", Some(&a.args)),
+        Command::Start(a) => ("start", Some(&a.args)),
+        Command::Run(a) => ("run", Some(&a.args)),
+        Command::Fmt(a) => ("fmt", Some(&a.args)),
+        Command::RunFile(a) => ("run-file", Some(&a.args)),
+        Command::Exec(a) => ("exec", Some(&a.args)),
+        Command::Test(a) => ("test", Some(&a.args)),
+        Command::Lint(a) => ("lint", Some(&a.args)),
+        Command::Check(a) => ("check", Some(&a.args)),
         Command::Db(sub) => match sub {
-            DbCommand::Migrate(..) => "db.migrate",
-            DbCommand::Rollback(..) => "db.rollback",
-            DbCommand::Seed(..) => "db.seed",
-            DbCommand::Create(..) => "db.create",
-            DbCommand::Drop(..) => "db.drop",
-            DbCommand::Reset(..) => "db.reset",
-            DbCommand::Status(..) => "db.status",
+            DbCommand::Migrate(a) => ("db.migrate", Some(&a.args)),
+            DbCommand::Rollback(a) => ("db.rollback", Some(&a.args)),
+            DbCommand::Seed(a) => ("db.seed", Some(&a.args)),
+            DbCommand::Create(a) => ("db.create", Some(&a.args)),
+            DbCommand::Drop(a) => ("db.drop", Some(&a.args)),
+            DbCommand::Reset(a) => ("db.reset", Some(&a.args)),
+            DbCommand::Status(a) => ("db.status", Some(&a.args)),
         },
-        Command::Init => "init",
-        Command::Clean(..) => "clean",
-        Command::Release(..) => "release",
-        Command::Publish(..) => "publish",
+        Command::Init => ("init", None),
+        Command::Clean(a) => ("clean", Some(&a.args)),
+        Command::Release(a) => ("release", Some(&a.args)),
+        Command::Publish(a) => ("publish", Some(&a.args)),
         Command::Tool(sub) => match sub {
-            ToolCommand::Info => "tool.info",
-            ToolCommand::Doctor => "tool.doctor",
-            ToolCommand::List => "tool.list",
-            ToolCommand::Docs => "tool.docs",
+            ToolCommand::Info => ("tool.info", None),
+            ToolCommand::Doctor => ("tool.doctor", None),
+            ToolCommand::List => ("tool.list", None),
+            ToolCommand::Docs => ("tool.docs", None),
         },
         Command::Config(sub) => match sub {
-            ConfigCommand::Show => "config.show",
+            ConfigCommand::Show => ("config.show", None),
         },
-        Command::Info => "info",
-        Command::Completions(..) => "completions",
-        Command::External(..) => unreachable!("External is dispatched before parse_command_name"),
+        Command::Info => ("info", None),
+        Command::Completions(..) => ("completions", None),
+        Command::External(..) => unreachable!("External is dispatched before command_parts"),
     }
+}
+
+/// Returns a dot-notation name for the given command variant.
+pub fn parse_command_name(cmd: &Command) -> &'static str {
+    command_parts(cmd).0
 }
 
 /// Extracts known universal flags from a command variant.
@@ -455,47 +461,7 @@ pub fn collect_universal_flags(cmd: &Command) -> UniversalFlags {
 
 /// Collects the passthrough/trailing args from any command variant.
 pub fn collect_remaining_args(cmd: &Command) -> Vec<String> {
-    match cmd {
-        Command::Dep(sub) => match sub {
-            DepCommand::Install(a)
-            | DepCommand::Remove(a)
-            | DepCommand::Update(a)
-            | DepCommand::Outdated(a)
-            | DepCommand::List(a)
-            | DepCommand::Audit(a)
-            | DepCommand::Lock(a)
-            | DepCommand::Why(a) => a.args.clone(),
-        },
-        Command::Build(a) => a.args.clone(),
-        Command::Start(a) => a.args.clone(),
-        Command::Run(a) => a.args.clone(),
-        Command::Fmt(a) => a.args.clone(),
-        Command::RunFile(a) => a.args.clone(),
-        Command::Exec(a) => a.args.clone(),
-        Command::Test(a) => a.args.clone(),
-        Command::Lint(a) => a.args.clone(),
-        Command::Check(a) => a.args.clone(),
-        Command::Db(sub) => match sub {
-            DbCommand::Migrate(a)
-            | DbCommand::Rollback(a)
-            | DbCommand::Seed(a)
-            | DbCommand::Create(a)
-            | DbCommand::Status(a) => a.args.clone(),
-            DbCommand::Drop(a) => a.args.clone(),
-            DbCommand::Reset(a) => a.args.clone(),
-        },
-        Command::Clean(a) => a.args.clone(),
-        Command::Release(a) => a.args.clone(),
-        Command::Publish(a) => a.args.clone(),
-        Command::Init
-        | Command::Info
-        | Command::Tool(_)
-        | Command::Config(_)
-        | Command::Completions(_) => vec![],
-        Command::External(..) => {
-            unreachable!("External is dispatched before collect_remaining_args")
-        }
-    }
+    command_parts(cmd).1.cloned().unwrap_or_default()
 }
 
 // ── Tests ──────────────────────────────────────────────────────────────
