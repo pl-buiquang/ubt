@@ -5,7 +5,12 @@ WORKDIR /app
 COPY go.mod main.go main_test.go ./
 
 RUN ubt info
+RUN ubt dep install
+RUN ubt dep list
+RUN ubt dep lock
 RUN ubt test
-RUN ubt build
 RUN ubt fmt
+RUN ubt fmt --check
+RUN ubt build
+RUN ubt start
 RUN ubt clean

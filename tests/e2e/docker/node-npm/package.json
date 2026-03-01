@@ -2,6 +2,11 @@
   "name": "hello",
   "version": "1.0.0",
   "scripts": {
-    "test": "node --test"
+    "test": "node --test",
+    "build": "node -e \"console.log('built')\"",
+    "lint": "node -e \"console.log('linted')\"",
+    "lint:fix": "node -e \"console.log('lint fixed')\"",
+    "format": "node -e \"console.log('formatted')\"",
+    "format:check": "node -e \"console.log('format ok')\""
   }
 }

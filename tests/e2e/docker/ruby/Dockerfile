@@ -4,8 +4,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends build-essential
 
 COPY ubt /usr/local/bin/ubt
 WORKDIR /app
-COPY Gemfile hello.rb ./
+COPY Gemfile hello.rb Rakefile ./
 COPY test/ ./test/
 
 RUN ubt info
 RUN ubt dep install
+RUN ubt dep list
+RUN ubt dep lock
+RUN ubt test
+RUN ubt run-file hello.rb
