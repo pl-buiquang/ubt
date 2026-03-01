@@ -1,0 +1,48 @@
+[plugin]
+name = "cpp"
+description = "C/C++ projects"
+homepage = "https://en.cppreference.com/"
+install_help = "https://gcc.gnu.org/"
+priority = 0
+default_variant = "cmake"
+
+[detect]
+files = ["CMakeLists.txt", "Makefile", "meson.build"]
+
+[variants.cmake]
+detect_files = ["CMakeLists.txt"]
+binary = "cmake"
+
+[variants.make]
+detect_files = ["Makefile"]
+binary = "make"
+
+[variants.meson]
+detect_files = ["meson.build"]
+binary = "meson"
+
+[commands]
+build = "{{tool}} --build build"
+test = "ctest --test-dir build"
+clean = "{{tool}} --build build --target clean"
+release = "{{tool}} --build build --config Release"
+"run-file" = "gcc {{file}} -o a.out && ./a.out"
+
+[commands.variants.make]
+build = "{{tool}}"
+test = "{{tool}} test"
+clean = "{{tool}} clean"
+run = "{{tool}} {{args}}"
+
+[commands.variants.meson]
+build = "{{tool}} compile -C builddir"
+test = "{{tool}} test -C builddir"
+clean = "{{tool}} compile -C builddir --clean"
+release = "{{tool}} compile -C builddir --buildtype=release"
+
+[unsupported]
+"dep.install" = "C/C++ dependency management varies. Use Conan, vcpkg, or your system package manager."
+"dep.install_pkg" = "C/C++ dependency management varies. Use Conan, vcpkg, or your system package manager."
+lint = "Use `clang-tidy` or `cppcheck` directly."
+fmt = "Use `clang-format` directly: clang-format -i src/**/*.cpp src/**/*.h"
+publish = "C/C++ projects are not published to a central registry."

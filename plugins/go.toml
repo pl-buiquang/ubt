@@ -25,7 +25,9 @@ start = "{{tool}} run ."
 "run-file" = "{{tool}} run {{file}}"
 test = "{{tool}} test ./..."
 lint = "golangci-lint run"
+"lint.fix" = "golangci-lint run --fix"
 fmt = "{{tool}} fmt ./..."
+"fmt.check" = "gofmt -l ."
 clean = "{{tool}} clean -cache"
 
 [flags.test]

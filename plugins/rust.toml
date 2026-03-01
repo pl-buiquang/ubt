@@ -20,7 +20,7 @@ binary = "cargo"
 "dep.list" = "{{tool}} tree"
 "dep.audit" = "{{tool}} audit"
 "dep.lock" = "{{tool}} generate-lockfile"
-build = "{{tool}} build --release"
+build = "{{tool}} build"
 start = "{{tool}} run"
 test = "{{tool}} test"
 lint = "{{tool}} clippy"
@@ -37,6 +37,7 @@ release = "{{tool}} build --release"
 
 [flags.test]
 watch = "unsupported"
+coverage = "unsupported"
 
 [unsupported]
 "dep.outdated" = "Use 'cargo-outdated': cargo install cargo-outdated && cargo outdated"

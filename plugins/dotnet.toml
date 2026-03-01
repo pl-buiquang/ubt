@@ -18,7 +18,6 @@ binary = "dotnet"
 "dep.remove" = "{{tool}} remove package {{args}}"
 "dep.list" = "{{tool}} list package"
 "dep.outdated" = "{{tool}} list package --outdated"
-"dep.update" = "{{tool}} list package --outdated"
 build = "{{tool}} build"
 test = "{{tool}} test"
 run = "{{tool}} run --project {{args}}"
@@ -28,11 +27,17 @@ publish = "{{tool}} publish"
 release = "{{tool}} publish -c Release"
 fmt = "{{tool}} format"
 "fmt.check" = "{{tool}} format --verify-no-changes"
+"lint.fix" = "{{tool}} format"
 
 [flags.build]
 dev = "--configuration Debug"
 
+[flags.test]
+coverage = "--collect:\"XPlat Code Coverage\""
+
 [unsupported]
+"dep.update" = "Run `dotnet outdated` or update packages in .csproj manually."
 "dep.audit" = "Use 'dotnet list package --vulnerable' to check for vulnerabilities"
 "dep.lock" = "Use 'dotnet restore --use-lock-file' to generate packages.lock.json"
 "dep.why" = "Use 'dotnet nuget why' (requires NuGet 6.7+) to trace dependencies"
+lint = "Use `dotnet format --verify-no-changes` for style checks or add a Roslyn analyzer."

@@ -1,0 +1,43 @@
+[plugin]
+name = "php"
+description = "PHP projects"
+homepage = "https://www.php.net/docs.php"
+install_help = "https://www.php.net/manual/en/install.php"
+priority = 0
+default_variant = "composer"
+
+[detect]
+files = ["composer.json"]
+
+[variants.composer]
+detect_files = ["composer.lock"]
+binary = "composer"
+
+[commands]
+"dep.install" = "{{tool}} install"
+"dep.install_pkg" = "{{tool}} require {{args}}"
+"dep.remove" = "{{tool}} remove {{args}}"
+"dep.update" = "{{tool}} update {{args}}"
+"dep.outdated" = "{{tool}} outdated"
+"dep.list" = "{{tool}} show"
+"dep.audit" = "{{tool}} audit"
+"dep.lock" = "{{tool}} update --lock"
+"dep.why" = "{{tool}} why {{args}}"
+build = "{{tool}} run build"
+test = "{{tool}} run test"
+run = "{{tool}} run {{args}}"
+exec = "{{tool}} exec {{args}}"
+lint = "{{tool}} run lint"
+"lint.fix" = "{{tool}} run lint:fix"
+fmt = "{{tool}} run format"
+"fmt.check" = "{{tool}} run format:check"
+start = "{{tool}} run dev"
+clean = "rm -rf vendor"
+"run-file" = "php {{file}}"
+
+[flags.test]
+coverage = "--coverage-text"
+
+[unsupported]
+publish = "Use `composer publish` or upload to Packagist manually."
+release = "Tag a release with git and push to Packagist."

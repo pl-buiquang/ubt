@@ -18,7 +18,6 @@ binary = "gradle"
 
 [commands]
 "dep.install" = "{{tool}} dependency:resolve"
-"dep.install_pkg" = "{{tool}} dependency:resolve"
 "dep.update" = "{{tool}} versions:use-latest-versions"
 "dep.list" = "{{tool}} dependency:tree"
 "dep.outdated" = "{{tool}} versions:display-dependency-updates"
@@ -33,7 +32,6 @@ release = "{{tool}} release:prepare release:perform"
 
 [commands.variants.gradle]
 "dep.install" = "{{tool}} dependencies"
-"dep.install_pkg" = "{{tool}} dependencies"
 "dep.update" = "{{tool}} dependencyUpdates"
 "dep.list" = "{{tool}} dependencies"
 "dep.outdated" = "{{tool}} dependencyUpdates"
@@ -46,7 +44,13 @@ clean = "{{tool}} clean"
 publish = "{{tool}} publish"
 run = "{{tool}} run"
 
+[flags.test]
+coverage = "unsupported"
+
 [unsupported]
+"dep.install_pkg" = "Java deps are managed in pom.xml / build.gradle. Use `mvn dependency:resolve` or `gradle dependencies` after editing."
+"dep.remove" = "Edit pom.xml or build.gradle directly to remove dependencies."
 "dep.audit" = "Use 'dependency-check' plugin: mvn dependency-check:check"
 "dep.lock" = "Maven/Gradle do not use lockfiles by default."
 "dep.why" = "Use 'mvn dependency:tree -Dincludes=<pkg>' to trace dependencies"
+"lint.fix" = "Java linters (Checkstyle, SpotBugs) do not support auto-fix. Use your IDE or a separate formatter."

@@ -106,6 +106,8 @@ const BUILTIN_RUST: &str = include_str!("../../plugins/rust.toml");
 const BUILTIN_JAVA: &str = include_str!("../../plugins/java.toml");
 const BUILTIN_DOTNET: &str = include_str!("../../plugins/dotnet.toml");
 const BUILTIN_RUBY: &str = include_str!("../../plugins/ruby.toml");
+const BUILTIN_PHP: &str = include_str!("../../plugins/php.toml");
+const BUILTIN_CPP: &str = include_str!("../../plugins/cpp.toml");
 
 const BUILTIN_PLUGINS: &[&str] = &[
     BUILTIN_GO,
@@ -115,6 +117,8 @@ const BUILTIN_PLUGINS: &[&str] = &[
     BUILTIN_JAVA,
     BUILTIN_DOTNET,
     BUILTIN_RUBY,
+    BUILTIN_PHP,
+    BUILTIN_CPP,
 ];
 
 // ── Plugin Registry ─────────────────────────────────────────────────────
@@ -341,6 +345,8 @@ mod tests {
         assert!(registry.get("java").is_some());
         assert!(registry.get("dotnet").is_some());
         assert!(registry.get("ruby").is_some());
+        assert!(registry.get("php").is_some());
+        assert!(registry.get("cpp").is_some());
     }
 
     #[test]
@@ -422,6 +428,6 @@ binary = "go"
     fn registry_names_returns_all() {
         let registry = PluginRegistry::new().unwrap();
         let names = registry.names();
-        assert!(names.len() >= 7);
+        assert!(names.len() >= 9);
     }
 }
