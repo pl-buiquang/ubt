@@ -4,6 +4,8 @@ use std::collections::HashMap;
 use std::fmt;
 use std::path::{Path, PathBuf};
 
+use indexmap::IndexMap;
+
 use crate::error::{Result, UbtError};
 
 // ── Data Model ──────────────────────────────────────────────────────────
@@ -146,16 +148,17 @@ const BUILTIN_PLUGINS: &[&str] = &[
 
 /// Registry of all loaded plugins (built-in and user-defined).
 /// Plugins are keyed by name and paired with their source location.
+/// Uses `IndexMap` to preserve insertion order for deterministic listing and detection.
 #[derive(Debug)]
 pub struct PluginRegistry {
-    plugins: HashMap<String, (Plugin, PluginSource)>,
+    plugins: IndexMap<String, (Plugin, PluginSource)>,
 }
 
 impl PluginRegistry {
     /// Create a new registry loaded with built-in plugins.
     pub fn new() -> Result<Self> {
         let mut registry = Self {
-            plugins: HashMap::new(),
+            plugins: IndexMap::new(),
         };
 
         for toml_str in BUILTIN_PLUGINS {
