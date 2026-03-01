@@ -36,3 +36,7 @@ See [PLAN.md](specs/PLAN.md) for full task details and dependency graph.
 - [ ] **Task 30:** Add unit tests for `resolve_alias()` — cover: alias found, alias not found, `{{args}}` substitution, multi-word alias (see `specs/IMPROVEMENTS.md` §6.1)
 - [x] **Task 31:** Add negative integration tests — at least one `.failure()` test per major error path (unknown command, unsupported flag, invalid tool, bad config TOML) (see `specs/IMPROVEMENTS.md` §6.2)
 - [ ] **Task 32:** E2E Docker tests for missing ecosystems — add Docker fixtures and tests for Java (Maven + Gradle), .NET, Yarn, Bun, and Deno (see `specs/IMPROVEMENTS.md` §6.3)
+- [ ] **Task 33:** Replace verbose `.iter().find()` with `.contains()` in `config.rs` — `BUILTIN_COMMANDS.iter().find(|&&c| c == alias)` → `BUILTIN_COMMANDS.contains(&alias.as_str())` and same for `BUILTIN_GROUPS` (see `specs/IMPROVEMENTS.md` §2.3)
+- [ ] **Task 34:** Use `write!` instead of `format!` + `push_str` in `executor.rs` — replace `cmd.push_str(&format!(" --{}", flag_name))` with `write!(cmd, " --{}", flag_name).unwrap()` to avoid temporary `String` allocation (see `specs/IMPROVEMENTS.md` §2.4)
+- [ ] **Task 35:** Add doc comments to public items — add `///` doc comments to `resolve_command()` in `src/executor.rs`, `ResolvedPlugin` and `PluginRegistry` in `src/plugin/mod.rs` (see `specs/IMPROVEMENTS.md` §7.1)
+- [ ] **Task 36:** Include span in TOML parse errors — in `src/plugin/declarative.rs:62`, include `e.span()` in the error message for better diagnostics (see `specs/IMPROVEMENTS.md` §7.2)
