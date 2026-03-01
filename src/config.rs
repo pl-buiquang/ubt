@@ -151,11 +151,7 @@ pub fn load_config(start_dir: &Path) -> Result<Option<(UbtConfig, PathBuf)>> {
 mod tests {
     use super::*;
     use std::path::Path;
-    use std::sync::Mutex;
     use tempfile::TempDir;
-
-    /// Serialize tests that touch the `UBT_CONFIG` environment variable.
-    static ENV_MUTEX: Mutex<()> = Mutex::new(());
 
     #[test]
     fn parse_rails_example() {
@@ -282,79 +278,39 @@ typecheck = "pnpm exec tsc --noEmit"
 
     #[test]
     fn find_config_walks_upward() {
-        let _lock = ENV_MUTEX.lock().unwrap();
-        // Ensure UBT_CONFIG is not set so the walk-up logic is exercised.
-        let prev = std::env::var("UBT_CONFIG").ok();
-        unsafe {
-            std::env::remove_var("UBT_CONFIG");
-        }
-
         let dir = TempDir::new().unwrap();
         std::fs::write(dir.path().join("ubt.toml"), "[project]\ntool = \"go\"").unwrap();
         let nested = dir.path().join("a").join("b").join("c");
         std::fs::create_dir_all(&nested).unwrap();
 
-        let result = find_config(&nested).unwrap().unwrap();
-
-        // Restore env
-        if let Some(v) = prev {
-            unsafe {
-                std::env::set_var("UBT_CONFIG", v);
-            }
-        }
-
-        assert_eq!(result.0.project.unwrap().tool.unwrap(), "go");
-        assert_eq!(result.1, dir.path());
+        // Ensure UBT_CONFIG is not set so the walk-up logic is exercised.
+        temp_env::with_var("UBT_CONFIG", None::<&str>, || {
+            let result = find_config(&nested).unwrap().unwrap();
+            assert_eq!(result.0.project.unwrap().tool.unwrap(), "go");
+            assert_eq!(result.1, dir.path());
+        });
     }
 
     #[test]
     fn find_config_returns_none_when_absent() {
-        let _lock = ENV_MUTEX.lock().unwrap();
-        let prev = std::env::var("UBT_CONFIG").ok();
-        unsafe {
-            std::env::remove_var("UBT_CONFIG");
-        }
-
         let dir = TempDir::new().unwrap();
-        let result = find_config(dir.path()).unwrap();
 
-        if let Some(v) = prev {
-            unsafe {
-                std::env::set_var("UBT_CONFIG", v);
-            }
-        }
-
-        assert!(result.is_none());
+        temp_env::with_var("UBT_CONFIG", None::<&str>, || {
+            let result = find_config(dir.path()).unwrap();
+            assert!(result.is_none());
+        });
     }
 
     #[test]
     fn find_config_respects_ubt_config_env() {
-        let _lock = ENV_MUTEX.lock().unwrap();
-
         let dir = TempDir::new().unwrap();
         let config_path = dir.path().join("custom.toml");
         std::fs::write(&config_path, "[project]\ntool = \"custom\"").unwrap();
 
-        // Save and set env var
-        let prev = std::env::var("UBT_CONFIG").ok();
-        unsafe {
-            std::env::set_var("UBT_CONFIG", &config_path);
-        }
-
-        let result = find_config(Path::new("/tmp"));
-
-        // Restore env
-        match prev {
-            Some(v) => unsafe {
-                std::env::set_var("UBT_CONFIG", v);
-            },
-            None => unsafe {
-                std::env::remove_var("UBT_CONFIG");
-            },
-        }
-
-        let (config, root) = result.unwrap().unwrap();
-        assert_eq!(config.project.unwrap().tool.unwrap(), "custom");
-        assert_eq!(root, dir.path());
+        temp_env::with_var("UBT_CONFIG", Some(config_path.to_str().unwrap()), || {
+            let (config, root) = find_config(Path::new("/tmp")).unwrap().unwrap();
+            assert_eq!(config.project.unwrap().tool.unwrap(), "custom");
+            assert_eq!(root, dir.path());
+        });
     }
 }

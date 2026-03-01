@@ -217,27 +217,13 @@ fn resolve_matches(matches: Vec<DetectMatch>, dir: &Path) -> Result<DetectionRes
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::sync::Mutex;
     use tempfile::TempDir;
-
-    static ENV_MUTEX: Mutex<()> = Mutex::new(());
 
     fn with_clean_env<F, R>(f: F) -> R
     where
         F: FnOnce() -> R,
     {
-        let _lock = ENV_MUTEX.lock().unwrap_or_else(|e| e.into_inner());
-        let prev = std::env::var("UBT_TOOL").ok();
-        unsafe {
-            std::env::remove_var("UBT_TOOL");
-        }
-        let result = f();
-        if let Some(v) = prev {
-            unsafe {
-                std::env::set_var("UBT_TOOL", v);
-            }
-        }
-        result
+        temp_env::with_var("UBT_TOOL", None::<&str>, f)
     }
 
     #[test]
