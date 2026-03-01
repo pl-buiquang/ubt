@@ -419,6 +419,39 @@ mod tests {
     }
 
     #[test]
+    fn detect_ruby_rails_project() {
+        with_clean_env(|| {
+            let dir = TempDir::new().unwrap();
+            std::fs::create_dir(dir.path().join("bin")).unwrap();
+            std::fs::write(dir.path().join("Gemfile"), "source 'https://rubygems.org'").unwrap();
+            std::fs::write(dir.path().join("bin/rails"), "#!/usr/bin/env ruby").unwrap();
+
+            let registry = PluginRegistry::new().unwrap();
+            let result = detect_tool(None, None, dir.path(), &registry).unwrap();
+
+            assert_eq!(result.plugin_name, "ruby");
+            assert_eq!(result.variant_name, "rails");
+        });
+    }
+
+    #[test]
+    fn detect_ruby_rails_with_lockfile() {
+        with_clean_env(|| {
+            let dir = TempDir::new().unwrap();
+            std::fs::create_dir(dir.path().join("bin")).unwrap();
+            std::fs::write(dir.path().join("Gemfile"), "source 'https://rubygems.org'").unwrap();
+            std::fs::write(dir.path().join("Gemfile.lock"), "").unwrap();
+            std::fs::write(dir.path().join("bin/rails"), "#!/usr/bin/env ruby").unwrap();
+
+            let registry = PluginRegistry::new().unwrap();
+            let result = detect_tool(None, None, dir.path(), &registry).unwrap();
+
+            assert_eq!(result.plugin_name, "ruby");
+            assert_eq!(result.variant_name, "rails");
+        });
+    }
+
+    #[test]
     fn detect_python_pip() {
         with_clean_env(|| {
             let dir = TempDir::new().unwrap();

@@ -9,7 +9,11 @@ default_variant = "bundler"
 files = ["Gemfile"]
 
 [variants.bundler]
-detect_files = ["Gemfile.lock"]
+detect_files = []
+binary = "bundle"
+
+[variants.rails]
+detect_files = ["bin/rails"]
 binary = "bundle"
 
 [variants.gem]
@@ -35,6 +39,20 @@ run = "{{tool}} exec {{args}}"
 exec = "{{tool}} exec {{args}}"
 clean = "{{tool}} clean"
 publish = "gem push pkg/*.gem"
+
+[commands.variants.rails]
+test = "{{tool}} exec rails test {{args}}"
+start = "{{tool}} exec rails server"
+build = "{{tool}} exec rails assets:precompile"
+run = "{{tool}} exec rails {{args}}"
+clean = "{{tool}} exec rails tmp:clear"
+"db.migrate" = "{{tool}} exec rails db:migrate"
+"db.rollback" = "{{tool}} exec rails db:rollback"
+"db.seed" = "{{tool}} exec rails db:seed"
+"db.create" = "{{tool}} exec rails db:create"
+"db.drop" = "{{tool}} exec rails db:drop"
+"db.reset" = "{{tool}} exec rails db:reset"
+"db.status" = "{{tool}} exec rails db:migrate:status"
 
 [commands.variants.gem]
 "dep.install" = "gem install"
