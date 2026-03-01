@@ -10,7 +10,7 @@ use ubt_cli::completions::generate_completions;
 use ubt_cli::config::load_config;
 use ubt_cli::detect::detect_tool;
 use ubt_cli::error::UbtError;
-use ubt_cli::executor::{ResolveContext, resolve_command, spawn_command};
+use ubt_cli::executor::{ResolveContext, execute_command, resolve_command};
 use ubt_cli::plugin::PluginRegistry;
 
 fn main() {
@@ -142,7 +142,7 @@ fn run(cli: Cli) -> Result<(), UbtError> {
         // In quiet mode, suppress our own output but still run the command
     }
 
-    // Execute
-    let exit_code = spawn_command(&cmd_str, resolved.install_help.as_deref())?;
+    // Execute (replaces current process on Unix via exec())
+    let exit_code = execute_command(&cmd_str, resolved.install_help.as_deref())?;
     process::exit(exit_code);
 }
