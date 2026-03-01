@@ -47,24 +47,24 @@ pub fn resolve_command(ctx: &ResolveContext) -> Result<String> {
     let remaining_args = ctx.remaining_args;
 
     // 1. Check config command overrides first
-    if let Some(cfg) = ctx.config {
-        if let Some(cmd_str) = cfg.commands.get(command_name) {
-            let args_str = remaining_args.join(" ");
-            let file_str = ctx.run_file.unwrap_or("");
-            let expanded = expand_template(
-                cmd_str,
-                &plugin.binary,
-                &args_str,
-                file_str,
-                ctx.project_root,
-            );
-            let with_flags = append_flags(expanded, command_name, plugin, ctx.flags)?;
-            return Ok(append_remaining_if_needed(
-                &with_flags,
-                remaining_args,
-                cmd_str,
-            ));
-        }
+    if let Some(cfg) = ctx.config
+        && let Some(cmd_str) = cfg.commands.get(command_name)
+    {
+        let args_str = remaining_args.join(" ");
+        let file_str = ctx.run_file.unwrap_or("");
+        let expanded = expand_template(
+            cmd_str,
+            &plugin.binary,
+            &args_str,
+            file_str,
+            ctx.project_root,
+        );
+        let with_flags = append_flags(expanded, command_name, plugin, ctx.flags)?;
+        return Ok(append_remaining_if_needed(
+            &with_flags,
+            remaining_args,
+            cmd_str,
+        ));
     }
 
     // 2. Check unsupported

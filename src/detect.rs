@@ -30,10 +30,10 @@ pub fn detect_tool(
 
     // 2. UBT_TOOL env var (already handled by clap's env feature on --tool,
     //    but also check explicitly for programmatic use)
-    if let Ok(tool) = std::env::var("UBT_TOOL") {
-        if !tool.is_empty() {
-            return resolve_explicit_tool(&tool, start_dir, registry);
-        }
+    if let Ok(tool) = std::env::var("UBT_TOOL")
+        && !tool.is_empty()
+    {
+        return resolve_explicit_tool(&tool, start_dir, registry);
     }
 
     // 3. Config [project].tool

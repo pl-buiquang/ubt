@@ -431,10 +431,12 @@ files = []
 "#;
         let result = parse_plugin_toml(toml);
         assert!(result.is_err());
-        assert!(result
-            .unwrap_err()
-            .to_string()
-            .contains("detect.files must not be empty"));
+        assert!(
+            result
+                .unwrap_err()
+                .to_string()
+                .contains("detect.files must not be empty")
+        );
     }
 
     #[test]

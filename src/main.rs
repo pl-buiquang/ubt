@@ -2,14 +2,14 @@ use std::process;
 
 use clap::Parser;
 use ubt_cli::cli::{
-    collect_remaining_args, collect_universal_flags, parse_command_name, Cli, Command,
-    ConfigCommand, RunArgs, RunFileArgs, ToolCommand,
+    Cli, Command, ConfigCommand, RunArgs, RunFileArgs, ToolCommand, collect_remaining_args,
+    collect_universal_flags, parse_command_name,
 };
 use ubt_cli::completions::generate_completions;
 use ubt_cli::config::load_config;
 use ubt_cli::detect::detect_tool;
 use ubt_cli::error::UbtError;
-use ubt_cli::executor::{resolve_command, spawn_command, ResolveContext};
+use ubt_cli::executor::{ResolveContext, resolve_command, spawn_command};
 use ubt_cli::plugin::{PluginRegistry, ResolvedPlugin};
 
 fn main() {
@@ -199,24 +199,24 @@ fn cmd_tool(
             let config_tool = config.and_then(|c| c.project.as_ref()?.tool.as_deref());
             match detect_tool(cli.tool.as_deref(), config_tool, project_root, registry) {
                 Ok(detection) => {
-                    if let Some((plugin, _)) = registry.get(&detection.plugin_name) {
-                        if let Some(variant) = plugin.variants.get(&detection.variant_name) {
-                            match which::which(&variant.binary) {
-                                Ok(path) => {
-                                    println!(
-                                        "{} {} is installed at {}",
-                                        detection.plugin_name,
-                                        variant.binary,
-                                        path.display()
-                                    );
+                    if let Some((plugin, _)) = registry.get(&detection.plugin_name)
+                        && let Some(variant) = plugin.variants.get(&detection.variant_name)
+                    {
+                        match which::which(&variant.binary) {
+                            Ok(path) => {
+                                println!(
+                                    "{} {} is installed at {}",
+                                    detection.plugin_name,
+                                    variant.binary,
+                                    path.display()
+                                );
+                            }
+                            Err(_) => {
+                                eprintln!("{} is not installed.", variant.binary);
+                                if let Some(help) = &plugin.install_help {
+                                    eprintln!("Install: {help}");
                                 }
-                                Err(_) => {
-                                    eprintln!("{} is not installed.", variant.binary);
-                                    if let Some(help) = &plugin.install_help {
-                                        eprintln!("Install: {help}");
-                                    }
-                                    process::exit(1);
-                                }
+                                process::exit(1);
                             }
                         }
                     }
@@ -266,10 +266,10 @@ fn cmd_config_show() -> Result<(), UbtError> {
     match load_config(&cwd)? {
         Some((config, root)) => {
             println!("Config file: {}", root.join("ubt.toml").display());
-            if let Some(project) = &config.project {
-                if let Some(tool) = &project.tool {
-                    println!("Tool: {tool}");
-                }
+            if let Some(project) = &config.project
+                && let Some(tool) = &project.tool
+            {
+                println!("Tool: {tool}");
             }
             if !config.commands.is_empty() {
                 println!("\nCommands:");

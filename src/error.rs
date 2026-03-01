@@ -16,13 +16,17 @@ pub enum UbtError {
         hint: String,
     },
 
-    #[error("No command configured for \"{command}\". Add it to ubt.toml:\n\n  [commands]\n  \"{command}\" = \"your command here\"")]
+    #[error(
+        "No command configured for \"{command}\". Add it to ubt.toml:\n\n  [commands]\n  \"{command}\" = \"your command here\""
+    )]
     CommandUnmapped { command: String },
 
     #[error("{message}")]
     ConfigError { message: String },
 
-    #[error("Multiple plugins detected: {plugins}. Set tool in ubt.toml:\n\n  [project]\n  tool = \"{suggested_tool}\"")]
+    #[error(
+        "Multiple plugins detected: {plugins}. Set tool in ubt.toml:\n\n  [project]\n  tool = \"{suggested_tool}\""
+    )]
     PluginConflict {
         plugins: String,
         suggested_tool: String,
