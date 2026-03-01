@@ -4,10 +4,16 @@ use std::collections::HashMap;
 use crate::error::{Result, UbtError};
 use crate::plugin::{DetectConfig, FlagTranslation, Plugin, Variant};
 
+/// The current plugin schema version supported by this build of ubt.
+const CURRENT_SCHEMA_VERSION: u32 = 1;
+
 // ── Raw TOML structs ────────────────────────────────────────────────────
 
 #[derive(Debug, Deserialize)]
 struct RawPluginToml {
+    /// Optional schema version for forward-compatible plugin loading.
+    #[serde(default)]
+    schema_version: Option<u32>,
     plugin: RawPluginMeta,
     detect: RawDetect,
     #[serde(default)]
@@ -69,6 +75,16 @@ pub fn parse_plugin_toml(content: &str) -> Result<Plugin> {
             None => format!("TOML parse error: {}", e.message()),
         },
     })?;
+
+    // Warn if the plugin schema version is newer than what we support
+    if let Some(version) = raw.schema_version
+        && version > CURRENT_SCHEMA_VERSION
+    {
+        eprintln!(
+            "ubt: warning: plugin '{}' uses schema_version {}, but this version of ubt only supports {}. Some features may not work.",
+            raw.plugin.name, version, CURRENT_SCHEMA_VERSION
+        );
+    }
 
     // Validate required fields
     if raw.detect.files.is_empty() {
