@@ -322,7 +322,14 @@ pub enum ToolCommand {
     List,
 
     /// Open tool documentation
-    Docs,
+    Docs(DocsArgs),
+}
+
+#[derive(Parser, Debug)]
+pub struct DocsArgs {
+    /// Open the documentation URL in the system browser
+    #[arg(long)]
+    pub open: bool,
 }
 
 // ── Config subcommands ─────────────────────────────────────────────────
@@ -397,7 +404,7 @@ pub fn command_parts(cmd: &Command) -> (&'static str, Option<&Vec<String>>) {
             ToolCommand::Info => ("tool.info", None),
             ToolCommand::Doctor => ("tool.doctor", None),
             ToolCommand::List => ("tool.list", None),
-            ToolCommand::Docs => ("tool.docs", None),
+            ToolCommand::Docs(_) => ("tool.docs", None),
         },
         Command::Config(sub) => match sub {
             ConfigCommand::Show => ("config.show", None),

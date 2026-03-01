@@ -68,12 +68,19 @@ pub fn cmd_tool(
             }
             Ok(())
         }
-        ToolCommand::Docs => {
+        ToolCommand::Docs(args) => {
             let config_tool = config.and_then(|c| c.project.as_ref()?.tool.as_deref());
             let detection = detect_tool(cli.tool.as_deref(), config_tool, project_root, registry)?;
             if let Some((plugin, _)) = registry.get(&detection.plugin_name) {
                 if let Some(hp) = &plugin.homepage {
-                    println!("{hp}");
+                    if args.open {
+                        if let Err(e) = open::that(hp) {
+                            eprintln!("ubt: could not open browser: {e}");
+                            println!("{hp}");
+                        }
+                    } else {
+                        println!("{hp}");
+                    }
                 } else {
                     println!("No documentation URL configured for {}", plugin.name);
                 }
