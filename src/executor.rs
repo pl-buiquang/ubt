@@ -472,12 +472,12 @@ mod tests {
     fn resolve_config_override() {
         let plugin = make_test_plugin();
         let flags = UniversalFlags::default();
-        let mut commands = HashMap::new();
+        let mut commands = indexmap::IndexMap::new();
         commands.insert("test".to_string(), "custom-test-runner".to_string());
         let config = UbtConfig {
             project: None,
             commands,
-            aliases: HashMap::new(),
+            aliases: indexmap::IndexMap::new(),
         };
         let result = resolve_command(&ctx(
             "test",
@@ -548,11 +548,11 @@ mod tests {
 
     #[test]
     fn alias_found() {
-        let mut aliases = HashMap::new();
+        let mut aliases = indexmap::IndexMap::new();
         aliases.insert("t".to_string(), "custom test cmd".to_string());
         let config = UbtConfig {
             project: None,
-            commands: HashMap::new(),
+            commands: indexmap::IndexMap::new(),
             aliases,
         };
         assert_eq!(

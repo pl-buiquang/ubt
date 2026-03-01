@@ -30,7 +30,7 @@ See [PLAN.md](specs/PLAN.md) for full task details and dependency graph.
 - [x] **Task 24:** Cache glob pattern compilation in `detect.rs` — pre-compile `GlobBuilder` patterns at plugin load time instead of rebuilding on every detection call (see `specs/IMPROVEMENTS.md` §3.1)
 - [ ] **Task 25:** Split `executor.rs` into focused submodules — create `src/executor/{resolve,expand,flags,process}.rs` to separate concerns (see `specs/IMPROVEMENTS.md` §4.1)
 - [ ] **Task 26:** Split `main.rs` handlers into submodules — move `cmd_info`, `cmd_tool`, `cmd_config`, `cmd_init` to `src/commands/` (see `specs/IMPROVEMENTS.md` §4.2)
-- [ ] **Task 27:** Replace `HashMap` with `IndexMap` for ordered output — commands and aliases use `HashMap`; switch to `IndexMap` for deterministic `config show` / `tool list` output (see `specs/IMPROVEMENTS.md` §5.2)
+- [x] **Task 27:** Replace `HashMap` with `IndexMap` for ordered output — commands and aliases use `HashMap`; switch to `IndexMap` for deterministic `config show` / `tool list` output (see `specs/IMPROVEMENTS.md` §5.2)
 - [ ] **Task 28:** Add `Display` impls for `PluginSource` and `FlagTranslation` — improves debug messages and error context (see `specs/IMPROVEMENTS.md` §5.1)
 - [x] **Task 29:** Use `#[derive(Default)]` on `GlobalFlags` — replace manual `Default` impl with derive (see `specs/IMPROVEMENTS.md` §2.2)
 - [x] **Task 30:** Add unit tests for `resolve_alias()` — cover: alias found, alias not found, `{{args}}` substitution, multi-word alias (see `specs/IMPROVEMENTS.md` §6.1)

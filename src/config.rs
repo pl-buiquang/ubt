@@ -1,5 +1,5 @@
+use indexmap::IndexMap;
 use serde::Deserialize;
-use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
 use crate::error::{Result, UbtError};
@@ -58,9 +58,9 @@ pub struct UbtConfig {
     #[serde(default)]
     pub project: Option<ProjectConfig>,
     #[serde(default)]
-    pub commands: HashMap<String, String>,
+    pub commands: IndexMap<String, String>,
     #[serde(default)]
-    pub aliases: HashMap<String, String>,
+    pub aliases: IndexMap<String, String>,
 }
 
 // ── Parsing ────────────────────────────────────────────────────────────
@@ -240,11 +240,11 @@ typecheck = "pnpm exec tsc --noEmit"
 
     #[test]
     fn validate_alias_conflicting_with_command() {
-        let mut aliases = HashMap::new();
+        let mut aliases = IndexMap::new();
         aliases.insert("test".to_string(), "something".to_string());
         let config = UbtConfig {
             project: None,
-            commands: HashMap::new(),
+            commands: IndexMap::new(),
             aliases,
         };
         let err = validate_aliases(&config).unwrap_err();
@@ -259,11 +259,11 @@ typecheck = "pnpm exec tsc --noEmit"
 
     #[test]
     fn validate_alias_conflicting_with_group() {
-        let mut aliases = HashMap::new();
+        let mut aliases = IndexMap::new();
         aliases.insert("dep".to_string(), "something".to_string());
         let config = UbtConfig {
             project: None,
-            commands: HashMap::new(),
+            commands: IndexMap::new(),
             aliases,
         };
         let err = validate_aliases(&config).unwrap_err();
