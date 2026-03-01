@@ -65,6 +65,8 @@ pub struct Plugin {
     pub unsupported: HashMap<String, String>,
 }
 
+/// A fully resolved plugin variant ready for command execution.
+/// Contains the binary, command mappings, flag translations, and source metadata.
 #[derive(Debug, Clone)]
 pub struct ResolvedPlugin {
     pub name: String,
@@ -142,6 +144,8 @@ const BUILTIN_PLUGINS: &[&str] = &[
 
 // ── Plugin Registry ─────────────────────────────────────────────────────
 
+/// Registry of all loaded plugins (built-in and user-defined).
+/// Plugins are keyed by name and paired with their source location.
 #[derive(Debug)]
 pub struct PluginRegistry {
     plugins: HashMap<String, (Plugin, PluginSource)>,
