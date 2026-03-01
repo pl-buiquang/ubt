@@ -23,3 +23,16 @@ See [PLAN.md](specs/PLAN.md) for full task details and dependency graph.
 - [x] **Task 17:** E2E Docker Tests — Real builds in Docker containers (node, go, rust, python, ruby) against tiny hello-world projects
 - [x] **Task 18:** crates.io Publishing — rename package to `ubt-cli`, add `cargo publish` step to release workflow, document one-time setup
 - [ ] **Task 19:** Streamline releases with `cargo-release` — install `cargo-release`, add a `release.toml` config (`publish = false`, `tag-name = "{{version}}"`, conventional commit message), so `cargo release X.Y.Z --execute` replaces the manual 4-step bump/commit/tag/push process
+- [ ] **Task 20:** Fix unsafe env var usage in tests — replace `unsafe { env::set_var }` in `config.rs` and `detect.rs` tests with `temp-env` crate or parameter injection (see `specs/IMPROVEMENTS.md` §1.1)
+- [ ] **Task 21:** Fix silent glob failures in `detect.rs` — `glob_matches()` silently returns `false` on bad patterns; return `Result<bool>` and propagate the error (see `specs/IMPROVEMENTS.md` §1.2)
+- [ ] **Task 22:** Add Unix signal exit-code forwarding — `executor.rs:245` maps signal-killed process to exit code 1; use `ExitStatusExt::signal()` for `128 + signal` (see `specs/IMPROVEMENTS.md` §1.3)
+- [ ] **Task 23:** Deduplicate CLI match arms in `cli.rs` — extract `command_parts()` helper to replace the mirrored 40-arm blocks in `parse_command_name` and `collect_remaining_args` (see `specs/IMPROVEMENTS.md` §2.1)
+- [ ] **Task 24:** Cache glob pattern compilation in `detect.rs` — pre-compile `GlobBuilder` patterns at plugin load time instead of rebuilding on every detection call (see `specs/IMPROVEMENTS.md` §3.1)
+- [ ] **Task 25:** Split `executor.rs` into focused submodules — create `src/executor/{resolve,expand,flags,process}.rs` to separate concerns (see `specs/IMPROVEMENTS.md` §4.1)
+- [ ] **Task 26:** Split `main.rs` handlers into submodules — move `cmd_info`, `cmd_tool`, `cmd_config`, `cmd_init` to `src/commands/` (see `specs/IMPROVEMENTS.md` §4.2)
+- [ ] **Task 27:** Replace `HashMap` with `IndexMap` for ordered output — commands and aliases use `HashMap`; switch to `IndexMap` for deterministic `config show` / `tool list` output (see `specs/IMPROVEMENTS.md` §5.2)
+- [ ] **Task 28:** Add `Display` impls for `PluginSource` and `FlagTranslation` — improves debug messages and error context (see `specs/IMPROVEMENTS.md` §5.1)
+- [x] **Task 29:** Use `#[derive(Default)]` on `GlobalFlags` — replace manual `Default` impl with derive (see `specs/IMPROVEMENTS.md` §2.2)
+- [ ] **Task 30:** Add unit tests for `resolve_alias()` — cover: alias found, alias not found, `{{args}}` substitution, multi-word alias (see `specs/IMPROVEMENTS.md` §6.1)
+- [x] **Task 31:** Add negative integration tests — at least one `.failure()` test per major error path (unknown command, unsupported flag, invalid tool, bad config TOML) (see `specs/IMPROVEMENTS.md` §6.2)
+- [ ] **Task 32:** E2E Docker tests for missing ecosystems — add Docker fixtures and tests for Java (Maven + Gradle), .NET, Yarn, Bun, and Deno (see `specs/IMPROVEMENTS.md` §6.3)

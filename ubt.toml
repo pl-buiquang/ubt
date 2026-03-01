@@ -1,0 +1,21 @@
+# ubt.toml — Universal Build Tool configuration
+
+[project]
+# Pin the tool/runtime. Remove this line to let ubt auto-detect.
+# Supported: npm, pnpm, yarn, bun, deno, cargo, go, pip, uv, poetry, bundler
+tool = "cargo"
+
+# Override built-in commands with project-specific shell commands.
+# Available keys: build, start, test, lint, fmt, check, clean, run, exec,
+#   dep.install, dep.remove, dep.update, dep.list, dep.audit, dep.outdated,
+#   db.migrate, db.rollback, db.seed, db.create, db.drop, db.reset, db.status
+# Use {{args}} to forward extra CLI arguments to the underlying command.
+[commands]
+# start = "cargo run"
+# ...
+foo = "echo bar"
+
+# Add new commands not covered by built-ins.
+# Names must not conflict with built-ins (build, test, dep, db, …).
+[aliases]
+# hello = "echo hello world"
