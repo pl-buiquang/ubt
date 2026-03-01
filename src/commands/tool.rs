@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use std::path::Path;
 use std::process;
 
@@ -144,33 +143,6 @@ fn cmd_doctor(
                     ));
                 }
             }
-        }
-    }
-
-    // ── 4. Detect plugin command conflicts ──────────────────────────────
-    let mut command_owners: HashMap<&str, Vec<&str>> = HashMap::new();
-    for (name, (plugin, _)) in registry.iter() {
-        for cmd in plugin.commands.keys() {
-            command_owners
-                .entry(cmd.as_str())
-                .or_default()
-                .push(name.as_str());
-        }
-    }
-    let mut conflicts: Vec<_> = command_owners
-        .iter()
-        .filter(|(_, owners)| owners.len() > 1)
-        .collect();
-    conflicts.sort_by_key(|(cmd, _)| *cmd);
-    if conflicts.is_empty() {
-        check_ok!("No plugin command conflicts");
-    } else {
-        for (cmd, owners) in conflicts {
-            check_warn!(format!(
-                "Command '{}' defined by multiple plugins: {}",
-                cmd,
-                owners.join(", ")
-            ));
         }
     }
 
