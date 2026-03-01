@@ -121,7 +121,7 @@ fn resolve_explicit_tool(
     if let Some((plugin, source)) = registry.get(tool) {
         return Ok(DetectionResult {
             plugin_name: plugin.name.clone(),
-            variant_name: detect_variant_literal(plugin, start_dir)
+            variant_name: detect_variant_literal(plugin, start_dir)?
                 .unwrap_or_else(|| plugin.default_variant.clone()),
             source: source.clone(),
             project_root: start_dir.to_path_buf(),
@@ -225,25 +225,27 @@ fn detect_variant_compiled(cp: &CompiledPlugin<'_>, dir: &Path) -> Option<String
 
 /// Detect which variant to use based on lockfile presence (literal-only path for explicit tool).
 /// Used in `resolve_explicit_tool` where we don't have pre-compiled matchers.
-fn detect_variant_literal(plugin: &Plugin, dir: &Path) -> Option<String> {
+fn detect_variant_literal(plugin: &Plugin, dir: &Path) -> Result<Option<String>> {
     for (variant_name, variant) in &plugin.variants {
         for detect_file in &variant.detect_files {
             let matched = if detect_file.contains('*') {
-                globset::GlobBuilder::new(detect_file)
+                let glob = globset::GlobBuilder::new(detect_file)
                     .literal_separator(true)
                     .build()
-                    .ok()
-                    .map(|g| glob_matches_with(dir, &g.compile_matcher()))
-                    .unwrap_or(false)
+                    .map_err(|e| UbtError::InvalidGlobPattern {
+                        pattern: detect_file.clone(),
+                        detail: e.to_string(),
+                    })?;
+                glob_matches_with(dir, &glob.compile_matcher())
             } else {
                 dir.join(detect_file).exists()
             };
             if matched {
-                return Some(variant_name.clone());
+                return Ok(Some(variant_name.clone()));
             }
         }
     }
-    None
+    Ok(None)
 }
 
 /// Check if a pre-compiled glob matcher matches any file in the directory.
