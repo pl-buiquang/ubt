@@ -1,0 +1,9 @@
+{
+    "name": "example/hello",
+    "description": "Hello world PHP project",
+    "require": {},
+    "scripts": {
+        "test": "php -r \"assert(1 + 1 === 2, 'math is broken'); echo 'tests passed\\n';\"",
+        "build": "php -r \"echo 'build ok\\n';\""
+    }
+}

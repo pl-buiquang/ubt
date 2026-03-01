@@ -136,3 +136,23 @@ fn e2e_ruby() {
     }
     assert!(run_docker_build("ruby"), "Ruby E2E test failed");
 }
+
+#[test]
+#[ignore]
+fn e2e_php() {
+    if !docker_available() {
+        eprintln!("Docker not available, skipping");
+        return;
+    }
+    assert!(run_docker_build("php"), "PHP E2E test failed");
+}
+
+#[test]
+#[ignore]
+fn e2e_cpp() {
+    if !docker_available() {
+        eprintln!("Docker not available, skipping");
+        return;
+    }
+    assert!(run_docker_build("cpp"), "C/C++ E2E test failed");
+}
