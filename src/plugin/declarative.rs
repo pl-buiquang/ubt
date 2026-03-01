@@ -59,7 +59,15 @@ struct RawCommands {
 pub fn parse_plugin_toml(content: &str) -> Result<Plugin> {
     let raw: RawPluginToml = toml::from_str(content).map_err(|e| UbtError::PluginLoadError {
         name: "<unknown>".into(),
-        detail: format!("TOML parse error: {}", e.message()),
+        detail: match e.span() {
+            Some(span) => format!(
+                "TOML parse error at {}..{}: {}",
+                span.start,
+                span.end,
+                e.message()
+            ),
+            None => format!("TOML parse error: {}", e.message()),
+        },
     })?;
 
     // Validate required fields
