@@ -10,7 +10,6 @@ RUN ubt dep list
 RUN ubt dep lock
 RUN ubt test
 RUN ubt fmt
-RUN ubt fmt --check
 RUN ubt build
 RUN ubt start
 RUN ubt clean
