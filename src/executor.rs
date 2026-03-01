@@ -567,6 +567,37 @@ mod tests {
         assert_eq!(resolve_alias("nonexistent", &config), None);
     }
 
+    #[test]
+    fn alias_args_substitution() {
+        let mut aliases = HashMap::new();
+        aliases.insert("test".to_string(), "cargo test {{args}}".to_string());
+        let config = UbtConfig {
+            project: None,
+            commands: HashMap::new(),
+            aliases,
+        };
+        let resolved = resolve_alias("test", &config).unwrap();
+        assert_eq!(resolved, "cargo test {{args}}");
+        // Simulate the substitution that callers perform after resolving
+        let expanded = resolved.replace("{{args}}", "--release");
+        assert_eq!(expanded, "cargo test --release");
+    }
+
+    #[test]
+    fn alias_multi_word() {
+        let mut aliases = HashMap::new();
+        aliases.insert("b".to_string(), "cargo build --release".to_string());
+        let config = UbtConfig {
+            project: None,
+            commands: HashMap::new(),
+            aliases,
+        };
+        assert_eq!(
+            resolve_alias("b", &config),
+            Some("cargo build --release".to_string())
+        );
+    }
+
     // ── Command splitting ───────────────────────────────────────────────
 
     #[test]

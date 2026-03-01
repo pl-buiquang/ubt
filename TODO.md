@@ -33,7 +33,7 @@ See [PLAN.md](specs/PLAN.md) for full task details and dependency graph.
 - [ ] **Task 27:** Replace `HashMap` with `IndexMap` for ordered output — commands and aliases use `HashMap`; switch to `IndexMap` for deterministic `config show` / `tool list` output (see `specs/IMPROVEMENTS.md` §5.2)
 - [ ] **Task 28:** Add `Display` impls for `PluginSource` and `FlagTranslation` — improves debug messages and error context (see `specs/IMPROVEMENTS.md` §5.1)
 - [x] **Task 29:** Use `#[derive(Default)]` on `GlobalFlags` — replace manual `Default` impl with derive (see `specs/IMPROVEMENTS.md` §2.2)
-- [ ] **Task 30:** Add unit tests for `resolve_alias()` — cover: alias found, alias not found, `{{args}}` substitution, multi-word alias (see `specs/IMPROVEMENTS.md` §6.1)
+- [x] **Task 30:** Add unit tests for `resolve_alias()` — cover: alias found, alias not found, `{{args}}` substitution, multi-word alias (see `specs/IMPROVEMENTS.md` §6.1)
 - [x] **Task 31:** Add negative integration tests — at least one `.failure()` test per major error path (unknown command, unsupported flag, invalid tool, bad config TOML) (see `specs/IMPROVEMENTS.md` §6.2)
 - [ ] **Task 32:** E2E Docker tests for missing ecosystems — add Docker fixtures and tests for Java (Maven + Gradle), .NET, Yarn, Bun, and Deno (see `specs/IMPROVEMENTS.md` §6.3)
 - [ ] **Task 33:** Replace verbose `.iter().find()` with `.contains()` in `config.rs` — `BUILTIN_COMMANDS.iter().find(|&&c| c == alias)` → `BUILTIN_COMMANDS.contains(&alias.as_str())` and same for `BUILTIN_GROUPS` (see `specs/IMPROVEMENTS.md` §2.3)
