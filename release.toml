@@ -1,0 +1,5 @@
+# cargo-release configuration
+# Run: cargo release X.Y.Z --execute
+publish = false
+tag-name = "{{version}}"
+pre-release-commit-message = "chore: bump version to {{version}}"
