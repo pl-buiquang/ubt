@@ -40,6 +40,16 @@ The release workflow validates that the tag matches `Cargo.toml` version and tha
 
 To undo a bad tag: `git tag -d 0.3.0 && git push origin :0.3.0 && gh release delete 0.3.0 --yes`
 
+## Pre-Commit Checklist
+
+Before every commit and push, run all of the following and fix any failures:
+
+```bash
+cargo test
+cargo clippy -- -D warnings
+cargo fmt --check
+```
+
 ## Task Tracking
 
 When completing a task from `TODO.md`, mark it as done by changing `- [ ]` to `- [x]`.
