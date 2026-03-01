@@ -1,5 +1,7 @@
 use std::path::{Path, PathBuf};
 
+use globset::GlobMatcher;
+
 use crate::error::{Result, UbtError};
 use crate::plugin::{Plugin, PluginRegistry, PluginSource};
 
@@ -10,6 +12,68 @@ pub struct DetectionResult {
     pub variant_name: String,
     pub source: PluginSource,
     pub project_root: PathBuf,
+}
+
+/// Pre-compiled glob matchers for a single plugin's detect configuration.
+struct CompiledPlugin<'a> {
+    plugin: &'a Plugin,
+    source: &'a PluginSource,
+    /// Compiled matchers for `detect.files` (None = literal, Some = glob).
+    detect_matchers: Vec<Option<GlobMatcher>>,
+    /// Compiled matchers for each variant's `detect_files`, keyed by variant name order.
+    variant_matchers: Vec<(&'a str, Vec<Option<GlobMatcher>>)>,
+}
+
+impl<'a> CompiledPlugin<'a> {
+    fn new(plugin: &'a Plugin, source: &'a PluginSource) -> Result<Self> {
+        let detect_matchers = compile_patterns(&plugin.detect.files)?;
+
+        let variant_matchers = plugin
+            .variants
+            .iter()
+            .map(|(name, variant)| {
+                compile_patterns(&variant.detect_files).map(|m| (name.as_str(), m))
+            })
+            .collect::<Result<Vec<_>>>()?;
+
+        Ok(Self {
+            plugin,
+            source,
+            detect_matchers,
+            variant_matchers,
+        })
+    }
+}
+
+/// Compile a list of file patterns into optional `GlobMatcher`s.
+/// Literal patterns (no `*`) are represented as `None` (checked with `.exists()`).
+/// Glob patterns are compiled to `Some(GlobMatcher)`, or an error is returned.
+fn compile_patterns(patterns: &[String]) -> Result<Vec<Option<GlobMatcher>>> {
+    patterns
+        .iter()
+        .map(|p| {
+            if p.contains('*') {
+                globset::GlobBuilder::new(p)
+                    .literal_separator(true)
+                    .build()
+                    .map(|g| Some(g.compile_matcher()))
+                    .map_err(|e| UbtError::InvalidGlobPattern {
+                        pattern: p.clone(),
+                        detail: e.to_string(),
+                    })
+            } else {
+                Ok(None)
+            }
+        })
+        .collect()
+}
+
+/// Build compiled plugins from the registry (pre-compiles all glob patterns once).
+fn compile_registry(registry: &PluginRegistry) -> Result<Vec<CompiledPlugin<'_>>> {
+    registry
+        .iter()
+        .map(|(_name, (plugin, source))| CompiledPlugin::new(plugin, source))
+        .collect()
 }
 
 /// Detect the active tool using the SPEC §7.1 priority chain:
@@ -41,8 +105,9 @@ pub fn detect_tool(
         return resolve_explicit_tool(tool, start_dir, registry);
     }
 
-    // 4. Auto-detection
-    auto_detect(start_dir, registry)
+    // 4. Auto-detection — pre-compile glob patterns once before walking
+    let compiled = compile_registry(registry)?;
+    auto_detect(start_dir, &compiled)
 }
 
 /// Resolve an explicitly named tool (from CLI, env, or config).
@@ -56,7 +121,7 @@ fn resolve_explicit_tool(
     if let Some((plugin, source)) = registry.get(tool) {
         return Ok(DetectionResult {
             plugin_name: plugin.name.clone(),
-            variant_name: detect_variant(plugin, start_dir)?
+            variant_name: detect_variant_literal(plugin, start_dir)
                 .unwrap_or_else(|| plugin.default_variant.clone()),
             source: source.clone(),
             project_root: start_dir.to_path_buf(),
@@ -81,12 +146,12 @@ fn resolve_explicit_tool(
     })
 }
 
-/// Auto-detect tool by walking from start_dir upward.
-fn auto_detect(start_dir: &Path, registry: &PluginRegistry) -> Result<DetectionResult> {
+/// Auto-detect tool by walking from start_dir upward using pre-compiled matchers.
+fn auto_detect(start_dir: &Path, compiled: &[CompiledPlugin<'_>]) -> Result<DetectionResult> {
     let mut current = start_dir.to_path_buf();
 
     loop {
-        let matches = detect_at_dir(&current, registry)?;
+        let matches = detect_at_dir(&current, compiled);
         if !matches.is_empty() {
             return resolve_matches(matches, &current);
         }
@@ -107,81 +172,93 @@ struct DetectMatch {
     source: PluginSource,
 }
 
-/// Check all plugins for matches in the given directory.
-fn detect_at_dir(dir: &Path, registry: &PluginRegistry) -> Result<Vec<DetectMatch>> {
+/// Check all plugins for matches in the given directory using pre-compiled matchers.
+fn detect_at_dir(dir: &Path, compiled: &[CompiledPlugin<'_>]) -> Vec<DetectMatch> {
     let mut matches = Vec::new();
 
-    for (_name, (plugin, source)) in registry.iter() {
-        if plugin_matches_dir(plugin, dir)? {
-            let variant =
-                detect_variant(plugin, dir)?.unwrap_or_else(|| plugin.default_variant.clone());
+    for cp in compiled {
+        if plugin_matches_dir(cp, dir) {
+            let variant = detect_variant_compiled(cp, dir)
+                .unwrap_or_else(|| cp.plugin.default_variant.clone());
             matches.push(DetectMatch {
-                plugin_name: plugin.name.clone(),
+                plugin_name: cp.plugin.name.clone(),
                 variant_name: variant,
-                priority: plugin.priority,
-                source: source.clone(),
+                priority: cp.plugin.priority,
+                source: cp.source.clone(),
             });
         }
     }
 
-    Ok(matches)
+    matches
 }
 
-/// Check if a plugin's detect files are present in the given directory.
-fn plugin_matches_dir(plugin: &Plugin, dir: &Path) -> Result<bool> {
-    for pattern in &plugin.detect.files {
-        let matched = if pattern.contains('*') {
-            // Glob pattern (e.g., "*.csproj")
-            glob_matches(dir, pattern)?
-        } else {
-            dir.join(pattern).exists()
-        };
-        if matched {
-            return Ok(true);
+/// Check if a plugin's detect files are present in the given directory,
+/// using pre-compiled glob matchers.
+fn plugin_matches_dir(cp: &CompiledPlugin<'_>, dir: &Path) -> bool {
+    cp.plugin
+        .detect
+        .files
+        .iter()
+        .zip(cp.detect_matchers.iter())
+        .any(|(pattern, matcher)| match matcher {
+            Some(m) => glob_matches_with(dir, m),
+            None => dir.join(pattern).exists(),
+        })
+}
+
+/// Detect which variant to use based on lockfile presence, using pre-compiled matchers.
+fn detect_variant_compiled(cp: &CompiledPlugin<'_>, dir: &Path) -> Option<String> {
+    for (variant_name, matchers) in &cp.variant_matchers {
+        let variant = cp.plugin.variants.get(*variant_name)?;
+        for (detect_file, matcher) in variant.detect_files.iter().zip(matchers.iter()) {
+            let matched = match matcher {
+                Some(m) => glob_matches_with(dir, m),
+                None => dir.join(detect_file).exists(),
+            };
+            if matched {
+                return Some((*variant_name).to_string());
+            }
         }
     }
-    Ok(false)
+    None
 }
 
-/// Check if a glob pattern matches any file in the directory.
-fn glob_matches(dir: &Path, pattern: &str) -> Result<bool> {
-    let matcher = globset::GlobBuilder::new(pattern)
-        .literal_separator(true)
-        .build()
-        .map(|g| g.compile_matcher())
-        .map_err(|e| UbtError::InvalidGlobPattern {
-            pattern: pattern.to_string(),
-            detail: e.to_string(),
-        })?;
+/// Detect which variant to use based on lockfile presence (literal-only path for explicit tool).
+/// Used in `resolve_explicit_tool` where we don't have pre-compiled matchers.
+fn detect_variant_literal(plugin: &Plugin, dir: &Path) -> Option<String> {
+    for (variant_name, variant) in &plugin.variants {
+        for detect_file in &variant.detect_files {
+            let matched = if detect_file.contains('*') {
+                globset::GlobBuilder::new(detect_file)
+                    .literal_separator(true)
+                    .build()
+                    .ok()
+                    .map(|g| glob_matches_with(dir, &g.compile_matcher()))
+                    .unwrap_or(false)
+            } else {
+                dir.join(detect_file).exists()
+            };
+            if matched {
+                return Some(variant_name.clone());
+            }
+        }
+    }
+    None
+}
 
+/// Check if a pre-compiled glob matcher matches any file in the directory.
+fn glob_matches_with(dir: &Path, matcher: &GlobMatcher) -> bool {
     let Ok(entries) = std::fs::read_dir(dir) else {
-        return Ok(false);
+        return false;
     };
 
-    Ok(entries.filter_map(|e| e.ok()).any(|entry| {
+    entries.filter_map(|e| e.ok()).any(|entry| {
         entry
             .file_name()
             .to_str()
             .map(|name| matcher.is_match(name))
             .unwrap_or(false)
-    }))
-}
-
-/// Detect which variant to use based on lockfile presence.
-fn detect_variant(plugin: &Plugin, dir: &Path) -> Result<Option<String>> {
-    for (variant_name, variant) in &plugin.variants {
-        for detect_file in &variant.detect_files {
-            let matched = if detect_file.contains('*') {
-                glob_matches(dir, detect_file)?
-            } else {
-                dir.join(detect_file).exists()
-            };
-            if matched {
-                return Ok(Some(variant_name.clone()));
-            }
-        }
-    }
-    Ok(None)
+    })
 }
 
 /// Resolve multiple matches using priority. Error on ties.
