@@ -124,6 +124,7 @@ impl Plugin {
 
 const BUILTIN_GO: &str = include_str!("../../plugins/go.toml");
 const BUILTIN_NODE: &str = include_str!("../../plugins/node.toml");
+const BUILTIN_DENO: &str = include_str!("../../plugins/deno.toml");
 const BUILTIN_PYTHON: &str = include_str!("../../plugins/python.toml");
 const BUILTIN_RUST: &str = include_str!("../../plugins/rust.toml");
 const BUILTIN_JAVA: &str = include_str!("../../plugins/java.toml");
@@ -135,6 +136,7 @@ const BUILTIN_CPP: &str = include_str!("../../plugins/cpp.toml");
 const BUILTIN_PLUGINS: &[&str] = &[
     BUILTIN_GO,
     BUILTIN_NODE,
+    BUILTIN_DENO,
     BUILTIN_PYTHON,
     BUILTIN_RUST,
     BUILTIN_JAVA,
@@ -365,6 +367,7 @@ mod tests {
         let registry = PluginRegistry::new().unwrap();
         assert!(registry.get("go").is_some());
         assert!(registry.get("node").is_some());
+        assert!(registry.get("deno").is_some());
         assert!(registry.get("python").is_some());
         assert!(registry.get("rust").is_some());
         assert!(registry.get("java").is_some());
@@ -386,12 +389,21 @@ mod tests {
     fn registry_builtin_node_has_variants() {
         let registry = PluginRegistry::new().unwrap();
         let (plugin, _) = registry.get("node").unwrap();
-        assert_eq!(plugin.variants.len(), 5);
+        assert_eq!(plugin.variants.len(), 4);
         assert!(plugin.variants.contains_key("npm"));
         assert!(plugin.variants.contains_key("pnpm"));
         assert!(plugin.variants.contains_key("yarn"));
         assert!(plugin.variants.contains_key("bun"));
-        assert!(plugin.variants.contains_key("deno"));
+    }
+
+    #[test]
+    fn registry_builtin_deno_has_correct_detect() {
+        let registry = PluginRegistry::new().unwrap();
+        let (plugin, source) = registry.get("deno").unwrap();
+        assert!(plugin.detect.files.contains(&"deno.json".to_string()));
+        assert!(plugin.detect.files.contains(&"deno.jsonc".to_string()));
+        assert_eq!(plugin.priority, 1);
+        assert_eq!(*source, PluginSource::BuiltIn);
     }
 
     #[test]
@@ -453,7 +465,7 @@ binary = "go"
     fn registry_names_returns_all() {
         let registry = PluginRegistry::new().unwrap();
         let names = registry.names();
-        assert!(names.len() >= 9);
+        assert!(names.len() >= 10);
     }
 
     // ── Display impl tests ──────────────────────────────────────────────

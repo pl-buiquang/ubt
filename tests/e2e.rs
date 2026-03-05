@@ -219,3 +219,13 @@ fn e2e_node_deno() {
     }
     assert!(run_docker_build("node-deno"), "Node/deno E2E test failed");
 }
+
+#[test]
+#[ignore]
+fn e2e_deno() {
+    if !docker_available() {
+        eprintln!("Docker not available, skipping");
+        return;
+    }
+    assert!(run_docker_build("deno"), "Deno E2E test failed");
+}

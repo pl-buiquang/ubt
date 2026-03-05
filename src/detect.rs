@@ -548,4 +548,46 @@ mod tests {
             assert_eq!(result.variant_name, "mvn");
         });
     }
+
+    #[test]
+    fn detect_deno_project() {
+        with_clean_env(|| {
+            let dir = TempDir::new().unwrap();
+            std::fs::write(dir.path().join("deno.json"), "{}").unwrap();
+
+            let registry = PluginRegistry::new().unwrap();
+            let result = detect_tool(None, None, dir.path(), &registry).unwrap();
+
+            assert_eq!(result.plugin_name, "deno");
+            assert_eq!(result.variant_name, "deno");
+        });
+    }
+
+    #[test]
+    fn detect_deno_jsonc_project() {
+        with_clean_env(|| {
+            let dir = TempDir::new().unwrap();
+            std::fs::write(dir.path().join("deno.jsonc"), "{}").unwrap();
+
+            let registry = PluginRegistry::new().unwrap();
+            let result = detect_tool(None, None, dir.path(), &registry).unwrap();
+
+            assert_eq!(result.plugin_name, "deno");
+            assert_eq!(result.variant_name, "deno");
+        });
+    }
+
+    #[test]
+    fn detect_deno_wins_over_node_when_both_present() {
+        with_clean_env(|| {
+            let dir = TempDir::new().unwrap();
+            std::fs::write(dir.path().join("package.json"), "{}").unwrap();
+            std::fs::write(dir.path().join("deno.json"), "{}").unwrap();
+
+            let registry = PluginRegistry::new().unwrap();
+            let result = detect_tool(None, None, dir.path(), &registry).unwrap();
+
+            assert_eq!(result.plugin_name, "deno");
+        });
+    }
 }

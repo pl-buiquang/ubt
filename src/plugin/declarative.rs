@@ -249,10 +249,6 @@ binary = "yarn"
 detect_files = ["bun.lockb", "bun.lock"]
 binary = "bun"
 
-[variants.deno]
-detect_files = ["deno.json", "deno.jsonc"]
-binary = "deno"
-
 [commands]
 "dep.install" = "{{tool}} install"
 "dep.install_pkg" = "{{tool}} add {{args}}"
@@ -278,13 +274,6 @@ exec = "yarn dlx {{args}}"
 
 [commands.variants.bun]
 exec = "bunx {{args}}"
-
-[commands.variants.deno]
-"dep.install" = "deno install"
-"dep.install_pkg" = "deno add {{args}}"
-test = "deno test"
-run = "deno task {{args}}"
-exec = "deno run {{args}}"
 
 [flags.test]
 watch = "--watchAll"
@@ -344,7 +333,7 @@ dev = "--mode=development"
         assert_eq!(plugin.name, "node");
         assert_eq!(plugin.default_variant, "npm");
         assert_eq!(plugin.detect.files, vec!["package.json"]);
-        assert_eq!(plugin.variants.len(), 5);
+        assert_eq!(plugin.variants.len(), 4);
     }
 
     #[test]
@@ -352,7 +341,6 @@ dev = "--mode=development"
         let plugin = parse_plugin_toml(NODE_PLUGIN).unwrap();
         assert_eq!(plugin.command_variants["yarn"]["exec"], "yarn dlx {{args}}");
         assert_eq!(plugin.command_variants["bun"]["exec"], "bunx {{args}}");
-        assert_eq!(plugin.command_variants["deno"]["test"], "deno test");
     }
 
     #[test]
@@ -389,17 +377,6 @@ dev = "--mode=development"
             .unwrap();
         assert_eq!(resolved.commands["exec"], "yarn dlx {{args}}");
         assert_eq!(resolved.commands["dep.install_pkg"], "yarn add {{args}}");
-    }
-
-    #[test]
-    fn node_plugin_resolve_deno() {
-        use crate::plugin::PluginSource;
-        let plugin = parse_plugin_toml(NODE_PLUGIN).unwrap();
-        let resolved = plugin
-            .resolve_variant("deno", PluginSource::BuiltIn)
-            .unwrap();
-        assert_eq!(resolved.commands["test"], "deno test");
-        assert_eq!(resolved.commands["run"], "deno task {{args}}");
     }
 
     #[test]

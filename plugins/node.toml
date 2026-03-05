@@ -26,10 +26,6 @@ binary = "yarn"
 detect_files = ["bun.lockb", "bun.lock"]
 binary = "bun"
 
-[variants.deno]
-detect_files = ["deno.json", "deno.jsonc"]
-binary = "deno"
-
 [commands]
 "dep.install" = "{{tool}} install"
 "dep.install_pkg" = "{{tool}} add {{args}}"
@@ -60,13 +56,6 @@ exec = "pnpm dlx {{args}}"
 
 [commands.variants.bun]
 exec = "bunx {{args}}"
-
-[commands.variants.deno]
-"dep.install" = "deno install"
-"dep.install_pkg" = "deno add {{args}}"
-test = "deno test"
-run = "deno task {{args}}"
-exec = "deno run {{args}}"
 
 [flags.test]
 watch = "--watchAll"

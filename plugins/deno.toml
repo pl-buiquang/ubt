@@ -1,0 +1,36 @@
+schema_version = 1
+
+[plugin]
+name = "deno"
+description = "Deno projects"
+homepage = "https://docs.deno.com/"
+install_help = "https://docs.deno.com/runtime/getting_started/installation/"
+priority = 1
+default_variant = "deno"
+
+[detect]
+files = ["deno.json", "deno.jsonc"]
+
+[variants.deno]
+binary = "deno"
+
+[commands]
+"dep.install" = "deno install"
+"dep.install_pkg" = "deno add {{args}}"
+"dep.remove" = "deno remove {{args}}"
+test = "deno test"
+fmt = "deno fmt"
+"fmt.check" = "deno fmt --check"
+lint = "deno lint"
+build = "deno check {{args}}"
+run = "deno task {{args}}"
+exec = "deno run {{args}}"
+clean = "deno clean"
+
+[flags.test]
+watch = "--watch"
+coverage = "--coverage"
+
+[unsupported]
+"dep.audit" = "Deno has no built-in audit command. Check https://jsr.io for security advisories."
+"dep.why" = "Deno has no built-in dep-why command. Inspect your deno.json imports directly."
